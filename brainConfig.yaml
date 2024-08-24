@@ -1,0 +1,391 @@
+# All minimum and maximum values listed here are the minimum and maximum
+# starting values that can be put into the brains at the start.
+# Other factors may increase or decrease these values beyond the values to
+# which mutation set them.
+
+# Variables with names that include "MinMax" should be interpretted as,
+# "The maximum value is mutable, this is the minimum to which the mutation can change it."
+# The same principle applies with "MaxMax", "MinMin", and "MaxMin"
+# It is up to the user of this script to ensure that these values do not overlap in a way which
+# violates min/max logic principles.
+
+# All "probabilities" are given as values between 0 and 1 representing 0% to 100%
+Dendrite:
+  MinMinLength: 0.1
+  MaxMinLength: 1.5
+  MinMaxLength: 2.5
+  MaxMaxLength: 5.5
+  MinMinCount: 1
+  MaxMinCount: 3
+  MinMaxCount: 5
+  MaxMaxCount: 8
+  MinMinWeight: -2.0
+  MaxMinWeight: -0.5
+  MinMaxWeight: 0.5
+  MaxMaxWeight: 2.0
+Axon:
+  MinMinLength: 0.1
+  MaxMinLength: 1.1
+  MinMaxLength: 2.5
+  MaxMaxLength: 5.1
+  MinMinCount: 1
+  MaxMinCount: 3
+  MinMaxCount: 5
+  MaxMaxCount: 8
+Neuron:
+  FireProbabilistic: Mutable  # True: Probabilistic, False: Threshold
+  MinFireThreshold: 0.1 # If using fire threshold, minimum starting fire threshold
+  MaxFireThreshold: 0.9
+
+  # Max neuron age. This does not mean the neuron dies when it reaches this
+  # age. This in the value at which the normalized neuron-age value will
+  # reach 1.0. Age is measured in brain time steps.
+  MaxNeuronAge: 500
+
+  # Refractory period in effectively turned off if it is set to zero:
+  MinRefractoryPeriod: 0
+  MaxRefractoryPeriod: 5
+  
+  # Boolean, if false the neuron is placed randomly. Else, the nearby-variables apply:
+  NeuronDuplicatesNearby: Mutable
+  MinMinNearbyDistance: 0.01
+  MaxMinNearbyDistance: 0.25
+  MinMaxNearbyDistance: 0.3
+  MaxMaxNearbyDistance: 0.5
+
+  # The health at which neurons duplicate or die:
+  MinStartingDuplicateHealth: 0.8
+  MaxStartingDuplicateHealth: 1.0
+  MinStartingDeathHealth: 0.0
+  MaxStartingDeathHealth: 0.1
+
+  # The starting health value of neurons at creation:
+  MinNeuronStartingHealth: 0.6
+  MaxNeuronStartingHealth: 0.6
+
+  # These values are needed if "HEALTH_INCREASE_DECREASE" is used by the 
+  # neuron CGP program. If not, they are ignored. These values dictate the
+  # CGP output ranges which health goes up or down and by how much. If X is the
+  # CGP health-change output, then these values are used as such:
+  # (X < LowHealthChange) -> Health lowers by HealthChangeAmount
+  # (X > HighHealthChange) -> Health raises by HealthChangeAmount
+  # Else: Health doesn't change.
+  MinLowHealthChange: -0.6
+  MaxLowHealthChange: 0.0
+  MinHighHealthChange: 0.0
+  MaxHighHealthChange: 0.6
+  MinHealthChangeAmount: 0.02
+  MaxHealthChangeAmount: 0.2
+
+  # The health change to a neuron due to duplication.
+  MinNeuronDuplicateHealthChange: -0.4
+  MaxNeuronDuplicateHealthChange: -0.05
+
+  # Duplication and death threshold changers. These values will gradually change the health levels
+  # that trigger neuron duplication and death. The goal is that every death/duplication makes repeating
+  # that event harder and repeating the opposite event easier to prevent neuron explosion or total
+  # neural collapse.
+  # When a neuron duplicates, the health required to trigger duplication or death be multiplied by this value, thus making it more
+  # difficult to duplicate and easier to die. When a neuron dies, those values will be divided by this value, making it easier
+  # to duplicate and harder to die.
+  MinHealthThresholdMultiplier: 1.01
+  MaxHealthThresholdMultiplier: 1.2
+
+  # It is important that a neuron firing can lower the input values to
+  # other neurons as well as raise them. This allows for the creation of
+  # inhibitory neurons. Fire values will exist an the neuron level, meaning
+  # every axon from this neuron will fire at this value.
+  # EDIT: For now, inhibitory values will be handled by negative weights on
+  #       dendrites.  All neuron fire values will be positive.
+  MinMinFireValue: 1.0
+  MaxMinFireValue: 1.0
+  MinMaxFireValue: 1.0
+  MaxMaxFireValue: 1.0
+
+  # These values dictate how a neuron's fire deteriorates over time and space.
+  # Space deterioration:
+  # Input = <Neuron's fire output> / (1 + (<parameter> * <Distance from axon squared>))
+  MinNeuronSpaceDeteriorationParameter: 5.0
+  MaxNeuronSpaceDeteriorationParameter: 30.0
+
+  # Time deterioration:
+  # Input = <Neuron's fire output> / (1 + (<parameter> * <time steps since neuron firing>))
+  MinNeuronTimeDeteriorationParameter: 2.0
+  MaxNeuronTimeDeteriorationParameter: 4.0
+  
+  # Instead of deteriorating forever, the neuron's firing eventually just disappears:
+  MinNeuronFireLifetime: 2
+  MaxNeuronFireLifetime: 4
+
+Sleep:
+  UsePreTrainSleep: Mutable
+  UsePostTrainSleep: False
+Brain:
+  InputCount: 5  # Inputs TO the brain
+  InputsOnOneSide: True  # Alternative: Placed randomly
+  InputLocationsPassToChildProbabilityMinimum: 0.2
+  InputLocationsPassToChildProbabilityMaximum: 1.0
+  OutputCount: 2  # Outputs FROM the brain
+  OutputsOnOneSide: Mutable
+  OutputLocationsPassToChildProbabilityMinimum: 0.2
+  OutputLocationsPassToChildProbabilityMaximum: 1.0
+  MinDimension: 1.0
+  MaxDimension: 7.5
+  UseSameValueForAllDimensions: Mutable
+
+  # The number of time steps between when the environmental inputs are
+  # provided to the brain and when the brain's outputs are read and given
+  # back to the environment. 0 would indicate that the inputs are set
+  # and outputs read simultaneously, giving none of the neurons time to fire:
+  MinProcessingTimeStepsBetweenInputAndOutput: 2
+  MaxProcessingTimeStepsBetweenInputAndOutput: 9
+
+  # Brains have some residual changes that persist after an input
+  # has been processed. If this value is true, the brain will set all
+  # neurons to a blank slate between inputs. Otherwise, persistent changes,
+  # such as refractory time, will persist:
+  ResetBeforeProcessingInput: True
+  
+  # Chance for any given neuron that it will be recreated in its child's
+  # brain. All other neurons are random:
+  ProbabilityNeuronRecreatedInChild: 0.4
+  MinMinStartingNeurons: 3
+  MaxMinStartingNeurons: 6
+  MinMaxStartingNeurons: 6
+  MaxMaxStartingNeurons: 10
+
+  # To prevent neuron-explosion from bad brain mutations, set a max count:
+  MaxNeuronCount: 60
+
+Circuit:  
+  ########## Need something for creating and destroying circuits.  Random? Health? Require certain amount?
+  #########  Possibly kill circuit when too few neurons remain? Split circuits with too many?
+  MinMinDimension: 0.1
+  MaxMinDimension: 0.5
+  MinMaxDimension: 0.6
+  MaxMaxDimension: 1.1 
+  UseSameValueForAllDimensions: Mutable
+  
+  MinMinCircuitCount: 0
+  MaxMinCircuitCount: 3
+  MinMaxCircuitCount: 5
+  MaxMaxCircuitCount: 10
+  MinProbabilityIndividualCircuitIsPassedToChild: 0.1
+  MaxProbabilityIndividualCircuitIsPassedToChild: 1.0
+  
+  # These values change the firing threshold OR the outcome of the
+  # probability check to see if the neuron fires based. It is cumulative,
+  # meaning as more and more neurons in the same circuit fire, the chances
+  # of additional neurons in the same circuit firing goes up.
+  MinFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: -0.1
+  MaxFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: 0.1
+
+  # This is the chance that if a neuron is in a circuit and duplicates
+  # whether that neuron will be guaranteed to appear in the same circuit.
+  # This value will override the duplicate-nearby parameters found in the
+  # neuron section:
+  MinNeuronDuplicatesInSameCircuit: 0.1
+  MaxNeuronDuplicatesInSameCircuit: 1.0
+
+  # These variables will dictate how neurons health are changed
+  # based on the death or duplication of neurons in their shared circuit:
+  MinNeuronHealthChangeFromDeath: -0.2
+  MaxNeuronHealthChangeFromDeath: 0.2
+  MinNeuronHealthChangeFromDuplication: -0.2
+  MaxNeuronHealthChangeFromDuplication: 0.2
+
+  CircuitsCanOverlap: Mutable
+
+Equation:
+  UseMonolithicCGP: False # If True, need to provide details of monolith CGP
+  
+  SageAlgorithm: PPO
+  SageFileName: PPO_CartPole_v1
+
+  # Instead of 
+
+  # The inputs that the dendrite program will use. These apply
+  # for the whole experemint and aren't mutated. A different 
+  # naming scheme is used for these so that they match their enum
+  # variations in the code:
+  DendriteProgramInputs:
+    # Percentage of times that the brain's recent outputs matched
+    # with another output. If this is True, "SageAlgorithm" and "SageFileName"
+    # must be provided a level above.
+    SAGE_MATCH_PERCENT: True
+    CURRENT_WEIGHT: True
+    # X, Y, and Z of the direction of the strongest recent input,
+    # and whether or not that is a brain-input axon (alternative is that
+    # it is an axon attached to a neuron in the brain).
+    # Also include the strongest input value:
+    STRONGEST_INPUT_XYZ: True
+    STRONGEST_INPUT_DISTANCE: True
+    STRONGEST_INPUT_IS_OBSERVATION_AXON: True
+    STRONGEST_INPUT_VALUE: True
+    ##### STRONGEST_INPUT_IS_SELF  -- Want eventually.
+    # STRONGEST_INPUT_PERCENTAGE_OF_TOTAL_INPUT: False
+    # X, Y, and Z of the direction of the nearest axon and whether or not
+    # it is an observation axon.
+    NEAREST_AXON_XYZ: True
+    NEAREST_AXON_DISTANCE: True
+    NEAREST_AXON_IS_OBSERVATION_AXON: True
+    NEAREST_AXON_IS_PART_OF_SAME_NEURON: True
+    # Average magnitude of the value provided to the neuron from this
+    # dendrite:
+    INPUT_MAGNITUDE: True    
+    # The length of this dendrite:
+    CURRENT_LENGTH: True
+    # Information about the parent neuron:
+    NEURON_AGE: True
+    NEURON_HEALTH: True
+  
+  # These are the values that will be updated by the dendrite program.
+  # Any value not marked as True here will be unmodified by the program.
+  DendriteProgramOutputs:
+    LOCATION: False # 3 outputs: deltas for X, Y, and Z.
+    # Closer_to... moves the dendrite X% (-1.0 - 1.0) closer to the location
+    # of the specified value. With both applied, it can move twice.
+    # If Location is also specified, it will be move 3 times by 3
+    # somewhat-independent decisions. Negative values will move the dendrite
+    # away from the specified target.
+    CLOSER_TO_STRONGEST_INPUT: True
+    CLOSER_TO_NEAREST_AXON: True
+    HEALTH: False # Change in health; DENDRITE HEALTH NOT CURRENTLY IMPLEMENTED.
+    WEIGHT: True # Change to the weight applied to the input
+
+  AxonProgramInputs:
+    SAGE_MATCH_PERCENT: True   
+    # X, Y, and Z of the direction of the nearest dendrite.
+    NEAREST_DENDRITE_XYZ: True
+    NEAREST_DENDRITE_IS_PART_OF_SAME_NEURON: True
+    
+    # 0 if the nearest dendrite is attached to a neuron, 1 if that dendrite
+    # is an output read for the brain's output:
+    DENDRITE_TYPE: True
+    # Percentage of times that this neuron fired when possible (not resting)
+    PERCENTAGE_FIRE: True
+    PERCENTAGE_BRAIN_FIRE: True
+    NEURON_AGE: True
+    NEURON_HEALTH: True
+    CURRENT_LENGTH: True
+
+  AxonProgramOutputs:
+    LOCATION: True # 3 outputs, X, Y, and Z
+    HEALTH: True # Change, not absolute value. Not implemented yet.    
+
+  NeuronProgramInputs:
+    SAGE_MATCH_PERCENT: True
+    NEURON_AGE: True
+    NEURON_HEALTH: True
+    PERCENTAGE_FIRE: True
+    # The average frequency at which all neurons in the brain fired:
+    PERCENTAGE_BRAIN_FIRE: True
+
+  NeuronProgramOutputs:
+    HEALTH: False # Absolute change of the neuron's health
+    # Cannot be used in conjunction with HEALTH. With this output, the health
+    # values change in accordance with the variables: LowHealthChange,
+    # HighHealthChange, and HealthChangeAmount. See their descriptions above.
+    HEALTH_INCREASE_DECREASE: True
+
+  # Update frequency parameters. These dictate how often the CGP programs to
+  # update the brain and its components are run. Events are recorded between
+  # updates and a summary metric is passed to the update programs.
+  # The metric is determined by the program. It could be a sum, mean, median,
+  # or any other value to try to accurately represent what happened since
+  # the last time the update program was triggered.
+  
+  # Event determines the triggering update event:
+  #  - Scenario_Run: At the end of a full run through an RL environment.
+  #  - Brain_Output: At the end of an input to output cycle through the brain.
+  #  - Time_Step: At the end of a single time cycle, of which there may be
+  #              many for every time the brain receives an input and is
+  #              required to produce output. Using this will dramatically
+  #              increase the processing time required.
+  # Because this parameter can so drastically change the time required to
+  # run an experiment, it is not mutable. The experimenter must set this value
+  # to one of the above possible values.
+  UpdateProgramsEvent: Brain_Output
+  
+  # Frequency dictates how many times the update event must occur between
+  # update programs running. 1 means every time.
+  MinUpdateProgramsFrequency: 1
+  MaxUpdateProgramsFrequency: 1
+
+  # Each CGP Node needs to be constrained so values don't grow or shrink out of control:
+  # It is also important to set these values such that MinHighConstraint > MaxLowConstraint
+  # to prevent non-functional CGP equations.
+  MinLowConstraint: -5.0
+  MaxLowConstraint: 0.0
+  MinHighConstraint: 1.0
+  MaxHighConstraint: 5.0
+
+  # P-values are constant values passed to a function, independent of any
+  # inputs from the current circumstance:
+  MinMinP: -2.0
+  MaxMinP: 0.0
+  MinMaxP: 0.0
+  MaxMaxP: 2.0
+
+  # How many CGP neurons will be allocated per program to start.
+  # If FrameShift CGP is used, the CGP program may self-modify this number:
+  DendriteProgramCGPNodes: 50
+  AxonProgramCGPNodes: 50
+  NeuronProgramCGPNodes: 50
+
+  # This list of functions indicates whether on not the function is
+  # available for any given JBrainCGPIndividual to use in its processing.
+  # If a brain uses a function, then mutates into an individual that can't use
+  # it, it will be removed from options for later mutations. It won't be removed
+  # from the current processing path. It is important to have at least a few
+  # functions in this list set to True to prevent the possibility of mutating
+  # into an individual with no available functions.
+  
+  # Implementations of mutating these values aren't currently implemented.
+  # True or False will be dictated here or determined by the first
+  # random brain.
+  AvailableFunctions:
+    AND: Mutable
+    OR: Mutable
+    NAND: False
+    NOR: False
+    XOR: False
+    ANDNOTY: False
+    ADD: True
+    SUBTRACT: True
+    CMULT: Mutable
+    MULT: True
+    DIVIDE: True
+    CDIVIDE: Mutable
+    INV: Mutable
+    ABS: True
+    SQRTX: True
+    SQRTXY: True
+    CPOW: Mutable
+    POW: True
+    EXPX: True
+    SINX: False
+    ASINX: False
+    COSX: False
+    ACOSX: False
+    TANX: False
+    ATANX: False
+    LTE: True
+    GTE: True
+    GTEP: Mutable
+    LTEP: Mutable
+    MAX: True
+    MIN: True
+    XWIRE: False
+    YWIRE: False
+    CONST: Mutable
+
+# These are variables related to how the experiment is set up and where the
+# data is stored:
+Experiment:
+  MainDataDirectory: D:\Sync\PhD\ExperimentData\
+  ExperimentName: TrendSlope_50Trials
+
+
+
+    
