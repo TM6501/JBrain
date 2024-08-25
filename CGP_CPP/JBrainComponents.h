@@ -1,11 +1,15 @@
 #pragma once
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 // JBrain components will all be structures. They are meant to be used
 // and manipulated freely by the JBrains that create them.
 namespace JBrain
 {
+	float euclideanDist(const float& x1, const float& y1, const float& z1,
+		const float& x2, const float& y2, const float& z2);
+
 	struct JBrainComponent
 	{
 		float m_X;
@@ -27,6 +31,25 @@ namespace JBrain
 			m_X = fminf(maxX, fmaxf(minX, m_X));
 			m_Y = fminf(maxY, fmaxf(minY, m_Y));
 			m_Z = fminf(maxZ, fmaxf(minZ, m_Z));
+		}
+
+		// Given a set of coordinates, move this component so that it is
+		// within a specified distance, while maintaining relative direction:
+		void constrainLength(const float& x, const float& y, const float& z, const float& distance)
+		{
+			float currDist = euclideanDist(m_X, m_Y, m_Z, x, y, z);
+
+			// Already constrained:
+			if (currDist <= distance)
+				return;
+
+			// Get the percentage of each point's movement:
+			float distMult = distance / currDist;
+
+			// If we're higher, subtract. Lower, add:
+			m_X = x + ((m_X - x) * distMult);
+			m_Y = y + ((m_Y - y) * distMult);
+			m_Z = z + ((m_Z - z) * distMult);
 		}
 
 		JBrainComponent(float x, float y, float z) : m_X(x), m_Y(y), m_Z(z) {}
