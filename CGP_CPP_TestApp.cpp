@@ -29,8 +29,8 @@
 #include "GeneralCGPSolver.h"
 #include "GymTester.h"
 #include "Python.h"
-#include "DungeonRoomEnv.h"
-#include "SimpleRepeat.h"
+// #include "DungeonRoomEnv.h"
+// #include "SimpleRepeat.h"
 #include "IAgent.h"
 
 #include "json.hpp"
@@ -305,6 +305,7 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     const unsigned int trainingRuns = 30;
     const unsigned int testingRuns = 20;
     std::vector<double> rewards;
+    std::vector<double> testRewards;
     std::vector<double> obs;
     std::vector<double> sageAct;
     int sageChoice;
@@ -344,7 +345,9 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
         // Tell the brain to write out how well it did:
         brain->writeLineToCSVOutputFile(reward);
 
-        //if (i >= trainingRuns)
+        if (i >= trainingRuns)
+            testRewards.push_back(reward);
+
         rewards.push_back(reward);
     }
 
@@ -431,14 +434,18 @@ int testFullExperiment(std::string yamlFileName)
     JBrain::JBrainFactory* factory = JBrain::JBrainFactory::getInstance();    
     factory->initialize(yamlFileName);
     
-    std::cout << "Getting 10 random sample brains..." << std::endl;
+    unsigned int startPop = expConfig["StartingPopulationSize"].as<unsigned int>();
+
+    std::cout << "Getting " << startPop << " random sample brains..." << std::endl;
     std::vector<JBrain::JBrain*> population;
-    for (unsigned int i = 0; i < 10; ++i)
+    for (unsigned int i = 0; i < startPop; ++i)
         population.push_back(factory->getRandomBrain());
     
-    unsigned int trainingEpochs = 200;
+    unsigned int trainingEpochs = expConfig["MaximumEpochs"].as<unsigned int>();
     std::vector<double> allRewards;
-    double endReward = 7.0;
+    double endReward = expConfig["MaximumReward"].as<double>();
+    double minReward = expConfig["PopulationInfusionReward"].as<double>();
+    unsigned int populationAddSize = expConfig["PopulationInfusionSize"].as<unsigned int>();
     double maxReward;
     int maxIndex;
     std::vector<double> obs;
@@ -451,7 +458,7 @@ int testFullExperiment(std::string yamlFileName)
     {
         auto start = std::chrono::high_resolution_clock::now();
         
-        std::cout << "Beginning training on epoch " << i + 1;
+        std::cout << "Beginning training on epoch " << i + 1 << " / " << trainingEpochs;
         allRewards.clear();
 
         for (auto brain : population)
@@ -499,6 +506,17 @@ int testFullExperiment(std::string yamlFileName)
         // Create the new generation:
         population.clear();
         population = factory->getFullMutatedPopulation(parent);
+
+        // If they're doing poorly, add in some fresh blood:
+        if (maxReward < minReward)
+        {
+            std::cout << "Poor overall performance. " << maxReward
+                << " < " << minReward << ". Adding " << populationAddSize
+                << " random individuals to the population." << std::endl;
+
+            for (unsigned int i = 0; i < populationAddSize; ++i)
+                population.push_back(factory->getRandomBrain());
+        }
 
         // End the experiment early:
         if (maxReward > endReward)

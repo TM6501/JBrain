@@ -11,8 +11,8 @@
 
 # All "probabilities" are given as values between 0 and 1 representing 0% to 100%
 Dendrite:
-  MinMinLength: 0.1
-  MaxMinLength: 1.5
+  MinMinLength: 0.0
+  MaxMinLength: 0.0
   MinMaxLength: 2.5
   MaxMaxLength: 5.5
   MinMinCount: 1
@@ -24,8 +24,8 @@ Dendrite:
   MinMaxWeight: 0.5
   MaxMaxWeight: 2.0
 Axon:
-  MinMinLength: 0.1
-  MaxMinLength: 1.1
+  MinMinLength: 0.0
+  MaxMinLength: 0.0
   MinMaxLength: 2.5
   MaxMaxLength: 5.1
   MinMinCount: 1
@@ -384,7 +384,28 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TrendSlope_50Trials
+  ExperimentName: DebugExpConfigFileChanges
+  # Some reward functions base their grade on only the scores during the 
+  # test trials, so we separate from training trials:
+  TrainTrials: 40
+  TestTrials: 10
+  MaximumEpochs: 5
+ 
+  StartingPopulationSize: 15
+
+  # Not actually a maximum, but if reward reaches this, the experiment ends.
+  MaximumReward: 7.0
+  
+  # The reward at which we will add a group of random brains to the population
+  # because the current population is performing very poorly:
+  PopulationInfusionReward: 0.5
+  PopulationInfusionSize: 10
+ 
+  # Differing reward calculations and the multipliers that should be applied
+  # to them as they are included as part of the final calculation:
+  # ADD IN LATER, NEED PARAMETERS TO SINGLE-RUN FUNCTION  ####
+
+
 
 
 
