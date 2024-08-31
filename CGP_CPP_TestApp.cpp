@@ -423,7 +423,7 @@ int testFullExperiment(std::string yamlFileName)
     // Create a full experiment CSV:
     std::string csvFName = dataDir + "experimentSummary.csv";
     std::ofstream csvOut(csvFName.c_str());
-    csvOut << "epoch,bestScore,bestBrain,bestNeuronCount,trainingSeconds" << std::endl;
+    csvOut << "epoch,bestScore,bestBrain,bestParent,bestNeuronCount,trainingSeconds" << std::endl;
     csvOut.close();  // Reopen for each write since they are infrequent.
 
     Experiment::GymSageRunner* sageRunner = Experiment::GymSageRunner::getInstance();
@@ -489,11 +489,13 @@ int testFullExperiment(std::string yamlFileName)
             << " seconds." << std::endl;
         
         // Write line to our output CSV file
-        // epoch, best score, best brain, best brain's neuron count, training seconds        
+        // epoch, best score, best brain, best parent, best brain's neuron count,
+        // training seconds
         csvOut.open(csvFName.c_str(), std::ios_base::app);
         csvOut << i << ","
             << maxReward << ","
             << parent->getName() << ","
+            << parent->getParentName() << ","
             << parent->getNeuronCount() << ","
             << seconds << std::endl;
         csvOut.close();
@@ -529,8 +531,6 @@ int testFullExperiment(std::string yamlFileName)
     // Clean up:
     for (auto brain : population)
         delete brain;
-
-    csvOut.close();
 
     return 0;
 }

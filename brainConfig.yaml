@@ -35,7 +35,7 @@ Axon:
 Neuron:
   FireProbabilistic: Mutable  # True: Probabilistic, False: Threshold
   MinFireThreshold: 0.1 # If using fire threshold, minimum starting fire threshold
-  MaxFireThreshold: 0.9
+  MaxFireThreshold: 0.95
 
   # Max neuron age. This does not mean the neuron dies when it reaches this
   # age. This in the value at which the normalized neuron-age value will
@@ -44,7 +44,7 @@ Neuron:
 
   # Refractory period in effectively turned off if it is set to zero:
   MinRefractoryPeriod: 0
-  MaxRefractoryPeriod: 5
+  MaxRefractoryPeriod: 3
   
   # Boolean, if false the neuron is placed randomly. Else, the nearby-variables apply:
   NeuronDuplicatesNearby: Mutable
@@ -115,22 +115,22 @@ Neuron:
   
   # Instead of deteriorating forever, the neuron's firing eventually just disappears:
   MinNeuronFireLifetime: 2
-  MaxNeuronFireLifetime: 4
+  MaxNeuronFireLifetime: 6
 
 Sleep:
-  UsePreTrainSleep: Mutable
+  UsePreTrainSleep: False
   UsePostTrainSleep: False
 Brain:
   InputCount: 5  # Inputs TO the brain
-  InputsOnOneSide: True  # Alternative: Placed randomly
+  InputsOnOneSide: True  # Alternative: Placed randomly. All have X coord = 0.0
   InputLocationsPassToChildProbabilityMinimum: 0.2
   InputLocationsPassToChildProbabilityMaximum: 1.0
   OutputCount: 2  # Outputs FROM the brain
-  OutputsOnOneSide: Mutable
+  OutputsOnOneSide: True  # All have X coord = max
   OutputLocationsPassToChildProbabilityMinimum: 0.2
   OutputLocationsPassToChildProbabilityMaximum: 1.0
-  MinDimension: 1.0
-  MaxDimension: 7.5
+  MinDimension: 5.0
+  MaxDimension: 10.0
   UseSameValueForAllDimensions: Mutable
 
   # The number of time steps between when the environmental inputs are
@@ -155,7 +155,7 @@ Brain:
   MaxMaxStartingNeurons: 10
 
   # To prevent neuron-explosion from bad brain mutations, set a max count:
-  MaxNeuronCount: 60
+  MaxNeuronCount: 80
 
 Circuit:  
   ########## Need something for creating and destroying circuits.  Random? Health? Require certain amount?
@@ -310,7 +310,7 @@ Equation:
   # Frequency dictates how many times the update event must occur between
   # update programs running. 1 means every time.
   MinUpdateProgramsFrequency: 1
-  MaxUpdateProgramsFrequency: 1
+  MaxUpdateProgramsFrequency: 3
 
   # Each CGP Node needs to be constrained so values don't grow or shrink out of control:
   # It is also important to set these values such that MinHighConstraint > MaxLowConstraint
@@ -345,23 +345,23 @@ Equation:
   # True or False will be dictated here or determined by the first
   # random brain.
   AvailableFunctions:
-    AND: Mutable
-    OR: Mutable
+    AND: False
+    OR: False
     NAND: False
     NOR: False
     XOR: False
     ANDNOTY: False
     ADD: True
     SUBTRACT: True
-    CMULT: Mutable
+    CMULT: True
     MULT: True
     DIVIDE: True
-    CDIVIDE: Mutable
-    INV: Mutable
+    CDIVIDE: True
+    INV: True
     ABS: True
     SQRTX: True
     SQRTXY: True
-    CPOW: Mutable
+    CPOW: True
     POW: True
     EXPX: True
     SINX: False
@@ -372,29 +372,29 @@ Equation:
     ATANX: False
     LTE: True
     GTE: True
-    GTEP: Mutable
-    LTEP: Mutable
+    GTEP: True
+    LTEP: True
     MAX: True
     MIN: True
     XWIRE: False
     YWIRE: False
-    CONST: Mutable
+    CONST: True
 
 # These are variables related to how the experiment is set up and where the
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: DebugExpConfigFileChanges
+  ExperimentName: TestBrainName
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
-  TrainTrials: 40
-  TestTrials: 10
+  TrainTrials: 4
+  TestTrials: 4
   MaximumEpochs: 5
  
   StartingPopulationSize: 15
 
   # Not actually a maximum, but if reward reaches this, the experiment ends.
-  MaximumReward: 7.0
+  MaximumReward: 50.0
   
   # The reward at which we will add a group of random brains to the population
   # because the current population is performing very poorly:
