@@ -313,6 +313,7 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     std::vector<double> brainActIn {0.0};  // The action passed to the step function.
     bool done = false;
     float reward = 0.0;
+    bool firstObservation;
     
     for (int i = 0; i < trainingRuns + testingRuns; ++i)
     {
@@ -320,6 +321,7 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
         sageRunner->reset();
         sageRunner->getAllStatus(obs, sageAct, done, reward);
         
+        firstObservation = true;
         while (!done)
         {
             // Simple environment, sage choice is 0 or 1:
@@ -328,7 +330,8 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
                 sageChoice = 1;
 
             // Let the brain decide what to do:
-            brainAct = brain->processInput(obs, sageChoice);
+            brainAct = brain->processInput(obs, sageChoice, firstObservation);
+            firstObservation = false;
          
             // The environment expects a single element double vector with
             // 0 and 1 being the only acceptable values:

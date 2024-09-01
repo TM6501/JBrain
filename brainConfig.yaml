@@ -121,7 +121,7 @@ Sleep:
   UsePreTrainSleep: False
   UsePostTrainSleep: False
 Brain:
-  InputCount: 5  # Inputs TO the brain
+  InputCount: 4  # Inputs TO the brain
   InputsOnOneSide: True  # Alternative: Placed randomly. All have X coord = 0.0
   InputLocationsPassToChildProbabilityMinimum: 0.2
   InputLocationsPassToChildProbabilityMaximum: 1.0
@@ -384,11 +384,11 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TestBrainName
+  ExperimentName: TestSmallerJson
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
-  TrainTrials: 4
-  TestTrials: 4
+  TrainTrials: 10
+  TestTrials: 10
   MaximumEpochs: 5
  
   StartingPopulationSize: 15
