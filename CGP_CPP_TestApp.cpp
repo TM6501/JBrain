@@ -288,22 +288,22 @@ double trendlineSlope(const std::vector<double>& scores)
 }
 
 double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner,
-    const std::string& dataDir)
+    const std::string& dataDir, const unsigned int& trainingRuns,
+    const unsigned int& testingRuns)
 {
     // First, have the brain write itself out to json:
     json jOut;
     brain->writeSelfToJson(jOut);
     std::string jsonName = dataDir + brain->getName() + "_initial.json";
     std::ofstream outFile(jsonName.c_str());
-    outFile << std::setw(2) << jOut << std::endl;
+    // outFile << std::setw(2) << jOut << std::endl; // Human readable
+    outFile << jOut << std::endl; // Save space
     outFile.close();
 
     // Initialize our CSV output:
     brain->initializeCSVOutputFile(dataDir);
 
-    // Let it run and hopefully learn:
-    const unsigned int trainingRuns = 30;
-    const unsigned int testingRuns = 20;
+    // Let it run and hopefully learn:    
     std::vector<double> rewards;
     std::vector<double> testRewards;
     std::vector<double> obs;
@@ -359,7 +359,8 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     brain->writeSelfToJson(jOut2);
     std::string jsonName2 = dataDir + brain->getName() + "_final.json";
     std::ofstream outFile2(jsonName2.c_str());
-    outFile2 << std::setw(2) << jOut2 << std::endl;
+    // outFile << std::setw(2) << jOut << std::endl; // Human readable
+    outFile << jOut << std::endl; // Save space
     outFile2.close();
 
     // Reward will be the slope of a linear trendline to prioritize growth:
@@ -446,6 +447,8 @@ int testFullExperiment(std::string yamlFileName)
     double endReward = expConfig["MaximumReward"].as<double>();
     double minReward = expConfig["PopulationInfusionReward"].as<double>();
     unsigned int populationAddSize = expConfig["PopulationInfusionSize"].as<unsigned int>();
+    unsigned int trainingRuns = expConfig["TrainTrials"].as<unsigned int>();
+    unsigned int testingRuns = expConfig["TestTrials"].as<unsigned int>();    
     double maxReward;
     int maxIndex;
     std::vector<double> obs;
@@ -463,7 +466,8 @@ int testFullExperiment(std::string yamlFileName)
 
         for (auto brain : population)
         {
-            allRewards.push_back(testOneBrain(brain, sageRunner, dataDir));
+            allRewards.push_back(testOneBrain(brain, sageRunner, dataDir,
+                trainingRuns, testingRuns));
             std::cout << ".";
         }
 
