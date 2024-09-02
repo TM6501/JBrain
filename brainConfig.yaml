@@ -37,6 +37,14 @@ Neuron:
   MinFireThreshold: 0.1 # If using fire threshold, minimum starting fire threshold
   MaxFireThreshold: 0.95
 
+  # This is the list of activation functions that can be applied after
+  # a neuron sums its inputs but before there is a check against the fire
+  # threshold. Available options: None, Tanh, Sigmoid
+  ActivationFunctions:
+    - None
+    - Tanh
+#    - Sigmoid
+
   # Max neuron age. This does not mean the neuron dies when it reaches this
   # age. This in the value at which the normalized neuron-age value will
   # reach 1.0. Age is measured in brain time steps.
@@ -80,6 +88,11 @@ Neuron:
   # The health change to a neuron due to duplication.
   MinNeuronDuplicateHealthChange: -0.4
   MaxNeuronDuplicateHealthChange: -0.05
+  
+  # If True, the NeuronDuplicateHealthChange value will be ignored
+  # and instead, the neuron's health will reset to NeuronStartingHealth
+  # when it is duplicated:'
+  HealthResetAtDuplication: Mutable
 
   # Duplication and death threshold changers. These values will gradually change the health levels
   # that trigger neuron duplication and death. The goal is that every death/duplication makes repeating
@@ -384,17 +397,17 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TestSmallerJson
+  ExperimentName: TestActivationFunctions
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
-  TrainTrials: 10
-  TestTrials: 10
-  MaximumEpochs: 5
+  TrainTrials: 50
+  TestTrials: 50
+  MaximumEpochs: 500
  
   StartingPopulationSize: 15
 
   # Not actually a maximum, but if reward reaches this, the experiment ends.
-  MaximumReward: 50.0
+  MaximumReward: 4.0
   
   # The reward at which we will add a group of random brains to the population
   # because the current population is performing very poorly:

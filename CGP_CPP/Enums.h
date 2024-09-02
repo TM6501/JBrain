@@ -7,6 +7,16 @@
 
 namespace CGP
 {
+	// The activation functions that can be applied to neuron outputs:
+	enum class JNEURON_ACTIVATION_FUNCTION :int {
+		NONE,
+		TANH,
+		SIGMOID
+	};
+
+	std::string ActivationFunctionToString(JNEURON_ACTIVATION_FUNCTION x);
+	JNEURON_ACTIVATION_FUNCTION StringToActivationFunction(std::string in);
+
 	// Update frequency determines the triggering event that causes
 	// the update programs to run and change the JBrain's components:
 	enum class UPDATE_EVENT:int {

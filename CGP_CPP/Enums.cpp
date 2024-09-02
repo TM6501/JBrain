@@ -5,6 +5,37 @@
 
 namespace CGP
 {
+	std::string ActivationFunctionToString(JNEURON_ACTIVATION_FUNCTION x)
+	{
+		std::string retVal = "NONE";
+		switch (x)
+		{
+		case JNEURON_ACTIVATION_FUNCTION::TANH:
+			retVal = "TANH";
+			break;
+
+		case JNEURON_ACTIVATION_FUNCTION::SIGMOID:
+			retVal = "SIGMOID";
+		}
+
+		return retVal;
+	}
+
+	JNEURON_ACTIVATION_FUNCTION StringToActivationFunction(std::string in)
+	{
+		JNEURON_ACTIVATION_FUNCTION retVal = JNEURON_ACTIVATION_FUNCTION::NONE;
+
+		std::transform(in.begin(), in.end(), in.begin(), toupper);
+
+		if (in == "TANH")
+			retVal = JNEURON_ACTIVATION_FUNCTION::TANH;
+		else if (in == "SIGMOID")
+			retVal = JNEURON_ACTIVATION_FUNCTION::SIGMOID;
+
+		return retVal;
+	}
+
+
 	std::string UpdateEventToString(UPDATE_EVENT x)
 	{
 		std::string retVal = "UNDEFINED";
