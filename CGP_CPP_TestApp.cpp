@@ -315,7 +315,7 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     float reward = 0.0;
     bool firstObservation;
     
-    for (int i = 0; i < trainingRuns + testingRuns; ++i)
+    for (unsigned int i = 0; i < trainingRuns + testingRuns; ++i)
     {
         done = false;
         sageRunner->reset();

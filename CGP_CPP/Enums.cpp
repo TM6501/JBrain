@@ -195,6 +195,15 @@ namespace CGP
 		case CGP_OUTPUT::LOCATION:
 			retVal = "LOCATION";
 			break;
+		case CGP_OUTPUT::STRONGEST_INPUT_CLOSER_FURTHER:
+			retVal = "STRONGEST_INPUT_CLOSER_FURTHER";
+			break;
+		case CGP_OUTPUT::NEAREST_AXON_CLOSER_FURTHER:
+			retVal = "NEAREST_AXON_CLOSER_FURTHER";
+			break;
+		case CGP_OUTPUT::NEAREST_DENDRITE_CLOSER_FURTHER:
+			retVal = "NEAREST_DENDRITE_CLOSER_FURTHER";
+			break;
 		case CGP_OUTPUT::CLOSER_TO_STRONGEST_INPUT:
 			retVal = "CLOSER_TO_STRONGEST_INPUT";
 			break;
@@ -209,6 +218,9 @@ namespace CGP
 			break;
 		case CGP_OUTPUT::WEIGHT:
 			retVal = "WEIGHT";
+			break;
+		case CGP_OUTPUT::WEIGHT_HIGHER_LOWER:
+			retVal = "WEIGHT_HIGHER_LOWER";
 			break;
 		}
 
@@ -232,6 +244,8 @@ namespace CGP
 			retVal = CGP_OUTPUT::HEALTH_INCREASE_DECREASE;
 		else if (in == "WEIGHT")
 			retVal = CGP_OUTPUT::WEIGHT;
+		else if (in == "WEIGHT_HIGHER_LOWER")
+			retVal = CGP_OUTPUT::WEIGHT_HIGHER_LOWER;
 
 		return retVal;
 	}

@@ -23,6 +23,25 @@ Dendrite:
   MaxMinWeight: -0.5
   MinMaxWeight: 0.5
   MaxMaxWeight: 2.0
+
+  # See Neuron->MinLowHealthChange for a full description of how these variables
+  # will be used. They are used in a similar manner, but with respect to
+  # dendrite location.
+  MinLowMoveAway: -0.6
+  MaxLowMoveAway: 0.0
+  MinHighMoveToward: 0.0
+  MaxHighMoveToward: 0.6
+  MinMoveAmount: 0.02
+  MaxMoveAmount: 0.2
+
+  # Same, but for weight change:
+  MinLowWeightDecrease: -0.6
+  MaxLowWeightDecrease: 0.0
+  MinHighWeightIncrease: 0.0
+  MaxHighWeightIncrease: 0.6
+  MinWeightChangeAmount: 0.1
+  MaxWeightChangeAmount: 0.5
+
 Axon:
   MinMinLength: 0.0
   MaxMinLength: 0.0
@@ -32,6 +51,17 @@ Axon:
   MaxMinCount: 3
   MinMaxCount: 5
   MaxMaxCount: 8
+
+  # See Neuron->MinLowHealthChange for a full description of how these variables
+  # will be used. They are used in a similar manner, but with respect to
+  # dendrite location.
+  MinLowMoveAway: -0.6
+  MaxLowMoveAway: 0.0
+  MinHighMoveToward: 0.0
+  MaxHighMoveToward: 0.6
+  MinMoveAmount: 0.02
+  MaxMoveAmount: 0.2
+
 Neuron:
   FireProbabilistic: Mutable  # True: Probabilistic, False: Threshold
   MinFireThreshold: 0.1 # If using fire threshold, minimum starting fire threshold
@@ -136,15 +166,15 @@ Sleep:
 Brain:
   InputCount: 4  # Inputs TO the brain
   InputsOnOneSide: True  # Alternative: Placed randomly. All have X coord = 0.0
-  InputLocationsPassToChildProbabilityMinimum: 0.2
-  InputLocationsPassToChildProbabilityMaximum: 1.0
+  InputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
+  InputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
   OutputCount: 2  # Outputs FROM the brain
   OutputsOnOneSide: True  # All have X coord = max
-  OutputLocationsPassToChildProbabilityMinimum: 0.2
-  OutputLocationsPassToChildProbabilityMaximum: 1.0
-  MinDimension: 5.0
+  OutputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
+  OutputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
+  MinDimension: 2.0
   MaxDimension: 10.0
-  UseSameValueForAllDimensions: Mutable
+  UseSameValueForAllDimensions: True
 
   # The number of time steps between when the environmental inputs are
   # provided to the brain and when the brain's outputs are read and given
@@ -161,7 +191,7 @@ Brain:
   
   # Chance for any given neuron that it will be recreated in its child's
   # brain. All other neurons are random:
-  ProbabilityNeuronRecreatedInChild: 0.4
+  ProbabilityNeuronRecreatedInChild: 0.4  # Not implemented, yet.
   MinMinStartingNeurons: 3
   MaxMinStartingNeurons: 6
   MinMaxStartingNeurons: 6
@@ -231,7 +261,7 @@ Equation:
     # and whether or not that is a brain-input axon (alternative is that
     # it is an axon attached to a neuron in the brain).
     # Also include the strongest input value:
-    STRONGEST_INPUT_XYZ: True
+    STRONGEST_INPUT_XYZ: False
     STRONGEST_INPUT_DISTANCE: True
     STRONGEST_INPUT_IS_OBSERVATION_AXON: True
     STRONGEST_INPUT_VALUE: True
@@ -239,7 +269,7 @@ Equation:
     # STRONGEST_INPUT_PERCENTAGE_OF_TOTAL_INPUT: False
     # X, Y, and Z of the direction of the nearest axon and whether or not
     # it is an observation axon.
-    NEAREST_AXON_XYZ: True
+    NEAREST_AXON_XYZ: False
     NEAREST_AXON_DISTANCE: True
     NEAREST_AXON_IS_OBSERVATION_AXON: True
     NEAREST_AXON_IS_PART_OF_SAME_NEURON: True
@@ -256,20 +286,31 @@ Equation:
   # Any value not marked as True here will be unmodified by the program.
   DendriteProgramOutputs:
     LOCATION: False # 3 outputs: deltas for X, Y, and Z.
-    # Closer_to... moves the dendrite X% (-1.0 - 1.0) closer to the location
+
+    # These are used in conjunction with LowMoveAway, HighMoveToward, and MoveAmount
+    # Rather than giving an amount to move, the value is checked against a threshold
+    # and if met, a the dendrite moves a static amount toward/away from the target:
+    STRONGEST_INPUT_CLOSER_FURTHER: True
+    NEAREST_AXON_CLOSER_FURTHER: True
+
+    # Closer_to... moves the dendrite X% [-1.0, 1.0] closer to the location
     # of the specified value. With both applied, it can move twice.
     # If Location is also specified, it will be move 3 times by 3
     # somewhat-independent decisions. Negative values will move the dendrite
-    # away from the specified target.
-    CLOSER_TO_STRONGEST_INPUT: True
-    CLOSER_TO_NEAREST_AXON: True
+    # away from the specified target. If these are used in conjunction with
+    # STRONGEST_INPUT_CLOSER_FURTHER and/or NEAREST_AXON_CLOSER_FURTHER,
+    # multiple independent moves will be made, making it hard for the
+    # brain to learn:
+    CLOSER_TO_STRONGEST_INPUT: False
+    CLOSER_TO_NEAREST_AXON: False
     HEALTH: False # Change in health; DENDRITE HEALTH NOT CURRENTLY IMPLEMENTED.
-    WEIGHT: True # Change to the weight applied to the input
+    WEIGHT: False # Change to the weight applied to the input
+    WEIGHT_HIGHER_LOWER: True # Similar to ..._CLOSER_FURTHER parameters
 
   AxonProgramInputs:
     SAGE_MATCH_PERCENT: True   
     # X, Y, and Z of the direction of the nearest dendrite.
-    NEAREST_DENDRITE_XYZ: True
+    NEAREST_DENDRITE_XYZ: False
     NEAREST_DENDRITE_IS_PART_OF_SAME_NEURON: True
     
     # 0 if the nearest dendrite is attached to a neuron, 1 if that dendrite
@@ -283,7 +324,8 @@ Equation:
     CURRENT_LENGTH: True
 
   AxonProgramOutputs:
-    LOCATION: True # 3 outputs, X, Y, and Z
+    LOCATION: False # 3 outputs, X, Y, and Z
+    NEAREST_DENDRITE_CLOSER_FURTHER: True
     HEALTH: True # Change, not absolute value. Not implemented yet.    
 
   NeuronProgramInputs:
@@ -296,9 +338,10 @@ Equation:
 
   NeuronProgramOutputs:
     HEALTH: False # Absolute change of the neuron's health
-    # Cannot be used in conjunction with HEALTH. With this output, the health
-    # values change in accordance with the variables: LowHealthChange,
-    # HighHealthChange, and HealthChangeAmount. See their descriptions above.
+    # HEALTH_INCREASE_DECREASE cannot be used in conjunction with HEALTH.
+    # With this output, the health values change in accordance with the variables:
+    # LowHealthChange, HighHealthChange, and HealthChangeAmount.
+    # See their descriptions above.
     HEALTH_INCREASE_DECREASE: True
 
   # Update frequency parameters. These dictate how often the CGP programs to
@@ -397,7 +440,7 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TestActivationFunctions
+  ExperimentName: CGP_IncreaseDecreaseTest
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
   TrainTrials: 50
