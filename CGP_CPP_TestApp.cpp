@@ -289,7 +289,8 @@ double trendlineSlope(const std::vector<double>& scores)
 
 double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner,
     const std::string& dataDir, const unsigned int& trainingRuns,
-    const unsigned int& testingRuns)
+    const unsigned int& testingRuns, const double& sageMatchReward,
+    const double& trendlineReward, const double& maxMinDiffReward)
 {
     // First, have the brain write itself out to json:
     json jOut;
@@ -313,7 +314,10 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     std::vector<double> brainActIn {0.0};  // The action passed to the step function.
     bool done = false;
     float reward = 0.0;
+    static double MAX_REWARD = 500.0; // Hardcoded for cartpole-v1
     bool firstObservation;
+    unsigned int testSageMatchChances = 0;
+    unsigned int testSageMatches = 0;
     
     for (unsigned int i = 0; i < trainingRuns + testingRuns; ++i)
     {
@@ -338,6 +342,19 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
             brainActIn[0] = 0; // Assume 0, change if needed:
             if (brainAct[1] > brainAct[0])
                 brainActIn[0] = 1.0;
+
+            // Check sage-matching:
+            if (i >= trainingRuns)
+            {
+                ++testSageMatchChances;
+                // Both 1:
+                if (sageChoice == 1 && brainAct[1] > brainAct[0])
+                    ++testSageMatches;
+
+                // Both 0:
+                else if (sageChoice == 0 && brainAct[1] <= brainAct[0])
+                    ++testSageMatches;
+            }
 
             sageRunner->step(brainActIn);
 
@@ -366,8 +383,26 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     outFile << jOut << std::endl; // Save space
     outFile2.close();
 
-    // Reward will be the slope of a linear trendline to prioritize growth:
-    return trendlineSlope(rewards);
+    // Calculate each reward:
+    double fullReward = trendlineSlope(rewards) * trendlineReward;
+
+    // Get the min and max of the test rewards:
+    double minTest = testRewards[0];
+    double maxTest = testRewards[0];
+    for (double& rew : testRewards)
+    {
+        minTest = fminf(minTest, rew);
+        maxTest = fmaxf(maxTest, rew);
+    }
+    double testDiff = (maxTest / MAX_REWARD) - (minTest / MAX_REWARD);
+    fullReward += testDiff * maxMinDiffReward;
+
+    double sageMatchPercent = static_cast<double>(testSageMatches) /
+        static_cast<double>(testSageMatchChances);
+
+    fullReward += sageMatchPercent * sageMatchReward;
+
+    return fullReward;
     /*
     // Final score is the average score during test time:
     double finalReward;
@@ -451,7 +486,13 @@ int testFullExperiment(std::string yamlFileName)
     double minReward = expConfig["PopulationInfusionReward"].as<double>();
     unsigned int populationAddSize = expConfig["PopulationInfusionSize"].as<unsigned int>();
     unsigned int trainingRuns = expConfig["TrainTrials"].as<unsigned int>();
-    unsigned int testingRuns = expConfig["TestTrials"].as<unsigned int>();    
+    unsigned int testingRuns = expConfig["TestTrials"].as<unsigned int>();
+
+    // Available reward calculations:
+    double sageMatchReward = expConfig["Reward_TestPercentSageMatch"].as<double>();
+    double trendSlopeReward = expConfig["Reward_AllTrendlineSlope"].as<double>();
+    double variationReward = expConfig["Reward_TestMaxMinPercentDiff"].as<double>();
+
     double maxReward;
     int maxIndex;
     std::vector<double> obs;
@@ -470,7 +511,8 @@ int testFullExperiment(std::string yamlFileName)
         for (auto brain : population)
         {
             allRewards.push_back(testOneBrain(brain, sageRunner, dataDir,
-                trainingRuns, testingRuns));
+                trainingRuns, testingRuns, sageMatchReward, trendSlopeReward,
+                variationReward));
             std::cout << ".";
         }
 

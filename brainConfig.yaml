@@ -11,10 +11,10 @@
 
 # All "probabilities" are given as values between 0 and 1 representing 0% to 100%
 Dendrite:
-  MinMinLength: 0.0
-  MaxMinLength: 0.0
+  MinMinLength: 0.5
+  MaxMinLength: 1.0
   MinMaxLength: 2.5
-  MaxMaxLength: 5.5
+  MaxMaxLength: 7.5
   MinMinCount: 1
   MaxMinCount: 3
   MinMaxCount: 5
@@ -51,7 +51,7 @@ Axon:
   MinMinLength: 0.0
   MaxMinLength: 0.0
   MinMaxLength: 2.5
-  MaxMaxLength: 5.1
+  MaxMaxLength: 7.5
   MinMinCount: 1
   MaxMinCount: 3
   MinMaxCount: 5
@@ -139,7 +139,7 @@ Neuron:
   # difficult to duplicate and easier to die. When a neuron dies, those values will be divided by this value, making it easier
   # to duplicate and harder to die.
   MinHealthThresholdMultiplier: 1.01
-  MaxHealthThresholdMultiplier: 1.2
+  MaxHealthThresholdMultiplier: 1.3
 
   # It is important that a neuron firing can lower the input values to
   # other neurons as well as raise them. This allows for the creation of
@@ -172,7 +172,7 @@ Sleep:
   UsePostTrainSleep: False
 Brain:
   InputCount: 4  # Inputs TO the brain
-  InputsOnOneSide: True  # Alternative: Placed randomly. All have X coord = 0.0
+  InputsOnOneSide: Mutable  # Alternative: Placed randomly. All have X coord = 0.0
   InputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
   InputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
 
@@ -182,7 +182,7 @@ Brain:
   InputsAge: Mutable
 
   OutputCount: 2  # Outputs FROM the brain
-  OutputsOnOneSide: True  # All have X coord = max
+  OutputsOnOneSide: Mutable  # All have X coord = max
   OutputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
   OutputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
   MinDimension: 2.0
@@ -255,8 +255,8 @@ Circuit:
 Equation:
   UseMonolithicCGP: False # If True, need to provide details of monolith CGP
   
-  SageAlgorithm: PPO
-  SageFileName: PPO_CartPole_v1
+  # SageAlgorithm: PPO
+  # SageFileName: PPO_CartPole_v1
 
   # Instead of 
 
@@ -461,17 +461,17 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: CGP_IncreaseDecreaseTest
+  ExperimentName: TestManyChanges
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
-  TrainTrials: 50
-  TestTrials: 50
+  TrainTrials: 90
+  TestTrials: 10  # At least 1 to prevent division by 0 problems elsewhere
   MaximumEpochs: 500
  
   StartingPopulationSize: 15
 
   # Not actually a maximum, but if reward reaches this, the experiment ends.
-  MaximumReward: 4.0
+  MaximumReward: 4.5
   
   # The reward at which we will add a group of random brains to the population
   # because the current population is performing very poorly:
@@ -479,11 +479,11 @@ Experiment:
   PopulationInfusionSize: 10
  
   # Differing reward calculations and the multipliers that should be applied
-  # to them as they are included as part of the final calculation:
-  # ADD IN LATER, NEED PARAMETERS TO SINGLE-RUN FUNCTION  ####
-
-
-
-
-
-    
+  # to them as they are included as part of the final calculation.
+  # Not the most extensible way to do this, but this section will provide a
+  # multiplier for each new reward type. These reward equations will be
+  # hardcoded in the test app. It is important to take this section of rewards
+  # into account when setting the maximum reward above:
+  Reward_TestPercentSageMatch: 1.0  # Percent between 0.0 and 1.0
+  Reward_AllTrendlineSlope: 1.0
+  Reward_TestMaxMinPercentDiff: -0.5
