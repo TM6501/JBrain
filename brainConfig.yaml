@@ -27,6 +27,11 @@ Dendrite:
   # See Neuron->MinLowHealthChange for a full description of how these variables
   # will be used. They are used in a similar manner, but with respect to
   # dendrite location.
+  # The moveToward value will also be the threshold for the random movement,
+  # if the output program uses it.
+  # The move amount is used as a percentage of away/towards a target
+  # and an absolute value for the random movement. We may want to separate
+  # those into two different mutatable parameters, but for now, we simplify.
   MinLowMoveAway: -0.6
   MaxLowMoveAway: 0.0
   MinHighMoveToward: 0.0
@@ -55,6 +60,8 @@ Axon:
   # See Neuron->MinLowHealthChange for a full description of how these variables
   # will be used. They are used in a similar manner, but with respect to
   # dendrite location.
+  # The moveToward value will also be the threshold for the random movement,
+  # if the output program uses it.
   MinLowMoveAway: -0.6
   MaxLowMoveAway: 0.0
   MinHighMoveToward: 0.0
@@ -293,6 +300,10 @@ Equation:
     STRONGEST_INPUT_CLOSER_FURTHER: True
     NEAREST_AXON_CLOSER_FURTHER: True
 
+    # Like above, if this value is higher than a given threshold, the
+    # dendrite will move a static amount in a random direction:
+    RANDOM_MOVEMENT_THRESHOLD: True
+
     # Closer_to... moves the dendrite X% [-1.0, 1.0] closer to the location
     # of the specified value. With both applied, it can move twice.
     # If Location is also specified, it will be move 3 times by 3
@@ -326,6 +337,10 @@ Equation:
   AxonProgramOutputs:
     LOCATION: False # 3 outputs, X, Y, and Z
     NEAREST_DENDRITE_CLOSER_FURTHER: True
+    
+    # Like above, if this value is higher than a given threshold, the
+    # axon will move a static amount in a random direction:
+    RANDOM_MOVEMENT_THRESHOLD: True
     HEALTH: True # Change, not absolute value. Not implemented yet.    
 
   NeuronProgramInputs:
