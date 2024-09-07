@@ -175,6 +175,12 @@ Brain:
   InputsOnOneSide: True  # Alternative: Placed randomly. All have X coord = 0.0
   InputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
   InputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
+
+  # If inputs age (true), then they are treated like any other neuron's axon
+  # fire: It spikes, then gradually falls off. Otherwise (false), they are
+  # ageless and act in calculations as though they always just fired.
+  InputsAge: Mutable
+
   OutputCount: 2  # Outputs FROM the brain
   OutputsOnOneSide: True  # All have X coord = max
   OutputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
