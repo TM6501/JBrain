@@ -146,6 +146,10 @@ namespace JBrain
 		unsigned int m_fireOpportunitiesSinceLastUpdate;
 		unsigned int m_timesFiredSinceLastUpdate;
 
+		// Track the same as above, but for a full run:
+		unsigned int m_fireOpportunitiesInThisRun;
+		unsigned int m_timesFiredInThisRun;
+
 		// For tracking purposes:
 		unsigned int m_neuronNumber;
 		int m_timeStepsSinceLastFire;
@@ -158,7 +162,8 @@ namespace JBrain
 			const unsigned int& neuronNumber) :
 			JBrainComponent(x, y, z), m_fireValue(fireValue),
 			m_health(health), m_fireOpportunitiesSinceLastUpdate(0),
-			m_timesFiredSinceLastUpdate(0), m_neuronNumber(neuronNumber),
+			m_timesFiredSinceLastUpdate(0), m_fireOpportunitiesInThisRun(0),
+			m_timesFiredInThisRun(0), m_neuronNumber(neuronNumber),
 			m_timeStepsSinceLastFire(-1), m_age(0)
 		{}
 
