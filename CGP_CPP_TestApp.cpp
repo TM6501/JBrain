@@ -380,7 +380,7 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     std::string jsonName2 = dataDir + brain->getName() + "_final.json";
     std::ofstream outFile2(jsonName2.c_str());
     // outFile << std::setw(2) << jOut << std::endl; // Human readable
-    outFile << jOut << std::endl; // Save space
+    outFile2 << jOut2 << std::endl; // Save space
     outFile2.close();
 
     // Calculate each reward:
