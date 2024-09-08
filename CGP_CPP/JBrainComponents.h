@@ -138,6 +138,9 @@ namespace JBrain
 		// The output value the neuron creates when it fires:
 		float m_fireValue;
 
+		// The threshold the neuron's inputs needs to hit in order to fire:
+		float m_fireThreshold;
+
 		// The neuron's current health:
 		float m_health;
 
@@ -158,13 +161,13 @@ namespace JBrain
 		friend bool operator==(const JNeuron& lhs, const JNeuron& rhs);
 
 		JNeuron(const float& x, const float& y, const float& z,
-			const float& fireValue, const float& health,
-			const unsigned int& neuronNumber) :
+			const float& fireValue, const float& fireThreshold,
+			const float& health, const unsigned int& neuronNumber) :
 			JBrainComponent(x, y, z), m_fireValue(fireValue),
-			m_health(health), m_fireOpportunitiesSinceLastUpdate(0),
-			m_timesFiredSinceLastUpdate(0), m_fireOpportunitiesInThisRun(0),
-			m_timesFiredInThisRun(0), m_neuronNumber(neuronNumber),
-			m_timeStepsSinceLastFire(-1), m_age(0)
+			m_fireThreshold(fireThreshold), m_health(health),
+			m_fireOpportunitiesSinceLastUpdate(0), m_timesFiredSinceLastUpdate(0),
+			m_fireOpportunitiesInThisRun(0), m_timesFiredInThisRun(0),
+			m_neuronNumber(neuronNumber), m_timeStepsSinceLastFire(-1), m_age(0)
 		{}
 
 		double getPercentageFire() const

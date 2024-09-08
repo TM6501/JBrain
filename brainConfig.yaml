@@ -37,7 +37,7 @@ Dendrite:
   MinHighMoveToward: 0.0
   MaxHighMoveToward: 0.6
   MinMoveAmount: 0.02
-  MaxMoveAmount: 0.2
+  MaxMoveAmount: 0.5
 
   # Same, but for weight change:
   MinLowWeightDecrease: -0.6
@@ -51,7 +51,7 @@ Axon:
   MinMinLength: 0.0
   MaxMinLength: 0.0
   MinMaxLength: 2.5
-  MaxMaxLength: 7.5
+  MaxMaxLength: 5.5
   MinMinCount: 1
   MaxMinCount: 3
   MinMaxCount: 5
@@ -67,7 +67,7 @@ Axon:
   MinHighMoveToward: 0.0
   MaxHighMoveToward: 0.6
   MinMoveAmount: 0.02
-  MaxMoveAmount: 0.2
+  MaxMoveAmount: 0.5
 
 Neuron:
   FireProbabilistic: Mutable  # True: Probabilistic, False: Threshold
@@ -90,6 +90,17 @@ Neuron:
   # Refractory period in effectively turned off if it is set to zero:
   MinRefractoryPeriod: 0
   MaxRefractoryPeriod: 3
+
+  # If dynamic fire thresholds are used, refractory periods are ignored.
+  # With dynamic fire thresholds, the fire threshold will go up every time
+  # the neuron fires and down any time that it doesn't. This threshold value
+  # will also apply to probabilistic firing. The fire threshold will start
+  # at FireThreshold for each neuron.
+  UseDynamicFireThresholds: True
+  MinFireThresholdIdleChange: -0.35
+  MaxFireThresholdIdleChange: -0.05
+  MinFireThresholdActiveChange: 0.05
+  MaxFireThresholdActiveChange: 1.0
   
   # Boolean, if false the neuron is placed randomly. Else, the nearby-variables apply:
   NeuronDuplicatesNearby: Mutable
@@ -167,7 +178,7 @@ Neuron:
   MinNeuronFireLifetime: 2
   MaxNeuronFireLifetime: 6
 
-Sleep:
+Sleep:  # Not implemented yet
   UsePreTrainSleep: False
   UsePostTrainSleep: False
 Brain:
@@ -182,7 +193,7 @@ Brain:
   InputsAge: Mutable
 
   OutputCount: 2  # Outputs FROM the brain
-  OutputsOnOneSide: Mutable  # All have X coord = max
+  OutputsOnOneSide: True  # All have X coord = max
   OutputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
   OutputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
   MinDimension: 2.0
@@ -193,7 +204,7 @@ Brain:
   # provided to the brain and when the brain's outputs are read and given
   # back to the environment. 0 would indicate that the inputs are set
   # and outputs read simultaneously, giving none of the neurons time to fire:
-  MinProcessingTimeStepsBetweenInputAndOutput: 2
+  MinProcessingTimeStepsBetweenInputAndOutput: 3
   MaxProcessingTimeStepsBetweenInputAndOutput: 9
 
   # Brains have some residual changes that persist after an input
