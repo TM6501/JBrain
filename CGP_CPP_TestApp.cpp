@@ -391,8 +391,8 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     double maxTest = testRewards[0];
     for (double& rew : testRewards)
     {
-        minTest = fminf(minTest, rew);
-        maxTest = fmaxf(maxTest, rew);
+        minTest = fmin(minTest, rew);
+        maxTest = fmax(maxTest, rew);
     }
     double testDiff = (maxTest / MAX_REWARD) - (minTest / MAX_REWARD);
     fullReward += testDiff * maxMinDiffReward;
