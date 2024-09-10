@@ -290,7 +290,8 @@ double trendlineSlope(const std::vector<double>& scores)
 double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner,
     const std::string& dataDir, const unsigned int& trainingRuns,
     const unsigned int& testingRuns, const double& sageMatchReward,
-    const double& trendlineReward, const double& maxMinDiffReward)
+    const double& trendlineReward, const double& maxMinDiffReward,
+    const double& brainCrashReward)
 {
     // First, have the brain write itself out to json:
     json jOut;
@@ -402,6 +403,10 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
 
     fullReward += sageMatchPercent * sageMatchReward;
 
+    // Check for brain crash:
+    if (brain->getNeuronCount() == 0)
+        fullReward += brainCrashReward;
+
     return fullReward;
     /*
     // Final score is the average score during test time:
@@ -492,6 +497,7 @@ int testFullExperiment(std::string yamlFileName)
     double sageMatchReward = expConfig["Reward_TestPercentSageMatch"].as<double>();
     double trendSlopeReward = expConfig["Reward_AllTrendlineSlope"].as<double>();
     double variationReward = expConfig["Reward_TestMaxMinPercentDiff"].as<double>();
+    double brainCrashReward = expConfig["Reward_PenaltyForBrainCrash"].as<double>();
 
     double maxReward;
     int maxIndex;
@@ -512,7 +518,7 @@ int testFullExperiment(std::string yamlFileName)
         {
             allRewards.push_back(testOneBrain(brain, sageRunner, dataDir,
                 trainingRuns, testingRuns, sageMatchReward, trendSlopeReward,
-                variationReward));
+                variationReward, brainCrashReward));
             std::cout << ".";
         }
 
@@ -693,6 +699,3 @@ int main(int argc, char** argv)
 }
 
 #endif
-
-
-
