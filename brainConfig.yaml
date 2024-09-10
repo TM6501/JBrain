@@ -13,7 +13,7 @@
 Dendrite:
   MinMinLength: 0.5
   MaxMinLength: 1.0
-  MinMaxLength: 2.5
+  MinMaxLength: 3.5
   MaxMaxLength: 7.5
   MinMinCount: 1
   MaxMinCount: 3
@@ -50,8 +50,8 @@ Dendrite:
 Axon:
   MinMinLength: 0.0
   MaxMinLength: 0.0
-  MinMaxLength: 2.5
-  MaxMaxLength: 5.5
+  MinMaxLength: 3.5
+  MaxMaxLength: 7.5
   MinMinCount: 1
   MaxMinCount: 3
   MinMaxCount: 5
@@ -111,9 +111,9 @@ Neuron:
 
   # The health at which neurons duplicate or die:
   MinStartingDuplicateHealth: 0.8
-  MaxStartingDuplicateHealth: 1.0
-  MinStartingDeathHealth: 0.0
-  MaxStartingDeathHealth: 0.1
+  MaxStartingDuplicateHealth: 2.0
+  MinStartingDeathHealth: -1.0
+  MaxStartingDeathHealth: 0.0
 
   # The starting health value of neurons at creation:
   MinNeuronStartingHealth: 0.6
@@ -126,10 +126,10 @@ Neuron:
   # (X < LowHealthChange) -> Health lowers by HealthChangeAmount
   # (X > HighHealthChange) -> Health raises by HealthChangeAmount
   # Else: Health doesn't change.
-  MinLowHealthChange: -0.6
+  MinLowHealthChange: -0.8
   MaxLowHealthChange: 0.0
   MinHighHealthChange: 0.0
-  MaxHighHealthChange: 0.6
+  MaxHighHealthChange: 0.8
   MinHealthChangeAmount: 0.02
   MaxHealthChangeAmount: 0.2
 
@@ -149,8 +149,8 @@ Neuron:
   # When a neuron duplicates, the health required to trigger duplication or death be multiplied by this value, thus making it more
   # difficult to duplicate and easier to die. When a neuron dies, those values will be divided by this value, making it easier
   # to duplicate and harder to die.
-  MinHealthThresholdMultiplier: 1.01
-  MaxHealthThresholdMultiplier: 1.3
+  MinHealthThresholdMultiplier: 1.1
+  MaxHealthThresholdMultiplier: 1.5
 
   # It is important that a neuron firing can lower the input values to
   # other neurons as well as raise them. This allows for the creation of
@@ -183,7 +183,7 @@ Sleep:  # Not implemented yet
   UsePostTrainSleep: False
 Brain:
   InputCount: 4  # Inputs TO the brain
-  InputsOnOneSide: Mutable  # Alternative: Placed randomly. All have X coord = 0.0
+  InputsOnOneSide: True  # Alternative: Placed randomly. All have X coord = 0.0
   InputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
   InputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
 
@@ -196,30 +196,30 @@ Brain:
   OutputsOnOneSide: True  # All have X coord = max
   OutputLocationsPassToChildProbabilityMinimum: 0.2  # Not implemented, yet.
   OutputLocationsPassToChildProbabilityMaximum: 1.0  # Not implemented, yet.
-  MinDimension: 2.0
-  MaxDimension: 10.0
+  MinDimension: 3.0
+  MaxDimension: 15.0
   UseSameValueForAllDimensions: True
 
   # The number of time steps between when the environmental inputs are
   # provided to the brain and when the brain's outputs are read and given
   # back to the environment. 0 would indicate that the inputs are set
   # and outputs read simultaneously, giving none of the neurons time to fire:
-  MinProcessingTimeStepsBetweenInputAndOutput: 3
+  MinProcessingTimeStepsBetweenInputAndOutput: 2
   MaxProcessingTimeStepsBetweenInputAndOutput: 9
 
   # Brains have some residual changes that persist after an input
   # has been processed. If this value is true, the brain will set all
   # neurons to a blank slate between inputs. Otherwise, persistent changes,
   # such as refractory time, will persist:
-  ResetBeforeProcessingInput: True
+  ResetBeforeProcessingInput: True  # Not yet implemented
   
   # Chance for any given neuron that it will be recreated in its child's
   # brain. All other neurons are random:
   ProbabilityNeuronRecreatedInChild: 0.4  # Not implemented, yet.
-  MinMinStartingNeurons: 3
-  MaxMinStartingNeurons: 6
-  MinMaxStartingNeurons: 6
-  MaxMaxStartingNeurons: 10
+  MinMinStartingNeurons: 4
+  MaxMinStartingNeurons: 7
+  MinMaxStartingNeurons: 8
+  MaxMaxStartingNeurons: 12
 
   # To prevent neuron-explosion from bad brain mutations, set a max count:
   MaxNeuronCount: 80
@@ -227,41 +227,41 @@ Brain:
 Circuit:  
   ########## Need something for creating and destroying circuits.  Random? Health? Require certain amount?
   #########  Possibly kill circuit when too few neurons remain? Split circuits with too many?
-  MinMinDimension: 0.1
+  MinMinDimension: 0.5
   MaxMinDimension: 0.5
-  MinMaxDimension: 0.6
+  MinMaxDimension: 1.1
   MaxMaxDimension: 1.1 
-  UseSameValueForAllDimensions: Mutable
+  UseSameValueForAllDimensions: True
   
-  MinMinCircuitCount: 0
+  MinMinCircuitCount: 3
   MaxMinCircuitCount: 3
-  MinMaxCircuitCount: 5
+  MinMaxCircuitCount: 10
   MaxMaxCircuitCount: 10
-  MinProbabilityIndividualCircuitIsPassedToChild: 0.1
-  MaxProbabilityIndividualCircuitIsPassedToChild: 1.0
+  MinProbabilityIndividualCircuitIsPassedToChild: 0.5
+  MaxProbabilityIndividualCircuitIsPassedToChild: 0.5
   
   # These values change the firing threshold OR the outcome of the
   # probability check to see if the neuron fires based. It is cumulative,
   # meaning as more and more neurons in the same circuit fire, the chances
   # of additional neurons in the same circuit firing goes up.
-  MinFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: -0.1
-  MaxFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: 0.1
+  MinFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: 0.0
+  MaxFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: 0.0
 
   # This is the chance that if a neuron is in a circuit and duplicates
   # whether that neuron will be guaranteed to appear in the same circuit.
   # This value will override the duplicate-nearby parameters found in the
   # neuron section:
-  MinNeuronDuplicatesInSameCircuit: 0.1
-  MaxNeuronDuplicatesInSameCircuit: 1.0
+  MinNeuronDuplicatesInSameCircuit: 0.5
+  MaxNeuronDuplicatesInSameCircuit: 0.5
 
   # These variables will dictate how neurons health are changed
   # based on the death or duplication of neurons in their shared circuit:
-  MinNeuronHealthChangeFromDeath: -0.2
-  MaxNeuronHealthChangeFromDeath: 0.2
-  MinNeuronHealthChangeFromDuplication: -0.2
-  MaxNeuronHealthChangeFromDuplication: 0.2
+  MinNeuronHealthChangeFromDeath: 0.0
+  MaxNeuronHealthChangeFromDeath: 0.0
+  MinNeuronHealthChangeFromDuplication: 0.0
+  MaxNeuronHealthChangeFromDuplication: 0.0
 
-  CircuitsCanOverlap: Mutable
+  CircuitsCanOverlap: False
 
 Equation:
   UseMonolithicCGP: False # If True, need to provide details of monolith CGP
@@ -417,9 +417,9 @@ Equation:
 
   # How many CGP neurons will be allocated per program to start.
   # If FrameShift CGP is used, the CGP program may self-modify this number:
-  DendriteProgramCGPNodes: 50
-  AxonProgramCGPNodes: 50
-  NeuronProgramCGPNodes: 50
+  DendriteProgramCGPNodes: 200
+  AxonProgramCGPNodes: 200
+  NeuronProgramCGPNodes: 200
 
   # This list of functions indicates whether on not the function is
   # available for any given JBrainCGPIndividual to use in its processing.
@@ -472,21 +472,21 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TestManyChanges
+  ExperimentName: BiggerTest 
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
-  TrainTrials: 90
+  TrainTrials: 190
   TestTrials: 10  # At least 1 to prevent division by 0 problems elsewhere
-  MaximumEpochs: 500
+  MaximumEpochs: 1000
  
   StartingPopulationSize: 15
 
   # Not actually a maximum, but if reward reaches this, the experiment ends.
-  MaximumReward: 4.5
+  MaximumReward: 3.0
   
   # The reward at which we will add a group of random brains to the population
   # because the current population is performing very poorly:
-  PopulationInfusionReward: 0.5
+  PopulationInfusionReward: 0.2
   PopulationInfusionSize: 10
  
   # Differing reward calculations and the multipliers that should be applied
@@ -498,3 +498,4 @@ Experiment:
   Reward_TestPercentSageMatch: 1.0  # Percent between 0.0 and 1.0
   Reward_AllTrendlineSlope: 1.0
   Reward_TestMaxMinPercentDiff: -0.5
+  Reward_PenaltyForBrainCrash: -2.0  # Added to the score if the brain has no neurons.
