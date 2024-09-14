@@ -11,8 +11,6 @@
 
 # All "probabilities" are given as values between 0 and 1 representing 0% to 100%
 Dendrite:
-  MinMinLength: 0.5
-  MaxMinLength: 1.0
   MinMaxLength: 3.5
   MaxMaxLength: 7.5
   MinMinCount: 1
@@ -48,8 +46,6 @@ Dendrite:
   MaxWeightChangeAmount: 0.5
 
 Axon:
-  MinMinLength: 0.0
-  MaxMinLength: 0.0
   MinMaxLength: 3.5
   MaxMaxLength: 7.5
   MinMinCount: 1
@@ -264,8 +260,6 @@ Circuit:
   CircuitsCanOverlap: False
 
 Equation:
-  UseMonolithicCGP: False # If True, need to provide details of monolith CGP
-  
   # SageAlgorithm: PPO
   # SageFileName: PPO_CartPole_v1
 
