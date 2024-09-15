@@ -135,6 +135,9 @@ namespace CGP
 		case CGP_INPUT::PERCENTAGE_BRAIN_FIRE:
 			retVal = "PERCENTAGE_BRAIN_FIRE";
 			break;
+		case CGP_INPUT::EXPECTED_OUTPUT_DIFF:
+			retVal = "EXPECTED_OUTPUT_DIFF";
+			break;
 		}
 
 		return retVal;
@@ -183,6 +186,8 @@ namespace CGP
 			retVal = CGP_INPUT::PERCENTAGE_FIRE;
 		else if (in == "PERCENTAGE_BRAIN_FIRE")
 			retVal = CGP_INPUT::PERCENTAGE_BRAIN_FIRE;
+		else if (in == "EXPECTED_OUTPUT")
+			retVal = CGP_INPUT::EXPECTED_OUTPUT_DIFF;
 
 		return retVal;
 	}

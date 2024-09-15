@@ -196,6 +196,13 @@ Brain:
   MaxDimension: 15.0
   UseSameValueForAllDimensions: True
 
+  # Instead of having a simple output dendrite, use an output neuron.
+  # These output neurons' dendrites' will have their own CGP updater separate
+  # from the CGP programs used elsewhere. This parameter must be True or False,
+  # not mutable. If it is True, there is expected to be a description of the
+  # output neuron dendrite's CGP parameters.
+  UseOutputNeurons: True
+
   # The number of time steps between when the environmental inputs are
   # provided to the brain and when the brain's outputs are read and given
   # back to the environment. 0 would indicate that the inputs are set
@@ -263,8 +270,6 @@ Equation:
   # SageAlgorithm: PPO
   # SageFileName: PPO_CartPole_v1
 
-  # Instead of 
-
   # The inputs that the dendrite program will use. These apply
   # for the whole experemint and aren't mutated. A different 
   # naming scheme is used for these so that they match their enum
@@ -293,12 +298,15 @@ Equation:
     NEAREST_AXON_IS_PART_OF_SAME_NEURON: True
     # Average magnitude of the value provided to the neuron from this
     # dendrite:
-    INPUT_MAGNITUDE: True    
+    INPUT_MAGNITUDE: True
     # The length of this dendrite:
     CURRENT_LENGTH: True
     # Information about the parent neuron:
     NEURON_AGE: True
     NEURON_HEALTH: True
+
+    # Can't be used by standard dendrite (only output dendrites)
+    EXPECTED_OUTPUT_DIFF: False
   
   # These are the values that will be updated by the dendrite program.
   # Any value not marked as True here will be unmodified by the program.
@@ -328,6 +336,44 @@ Equation:
     HEALTH: False # Change in health; DENDRITE HEALTH NOT CURRENTLY IMPLEMENTED.
     WEIGHT: False # Change to the weight applied to the input
     WEIGHT_HIGHER_LOWER: True # Similar to ..._CLOSER_FURTHER parameters
+
+  # This CGP program applies only to the dendrites of the output neuron, if output
+  # neurons are being used. If not, this is ignored.
+  # Due to how the YAML is read in, all of the possible dendrite values must
+  # be included. Set values to false to not use them.
+  OutputNeuronDendriteProgramInputs:
+    SAGE_MATCH_PERCENT: False    
+    STRONGEST_INPUT_XYZ: False
+    STRONGEST_INPUT_DISTANCE: True
+    STRONGEST_INPUT_IS_OBSERVATION_AXON: True
+    STRONGEST_INPUT_VALUE: True
+    NEAREST_AXON_XYZ: False
+    NEAREST_AXON_DISTANCE: True
+    NEAREST_AXON_IS_OBSERVATION_AXON: True
+    NEAREST_AXON_IS_PART_OF_SAME_NEURON: True
+    INPUT_MAGNITUDE: True    
+    CURRENT_LENGTH: False
+    NEURON_AGE: False
+    NEURON_HEALTH: False
+    EXPECTED_OUTPUT_DIFF: False
+    CURRENT_WEIGHT: True
+  
+    # Unique to output neuron:
+    # This assumes we'll keep using brain-output as the update trigger and
+    # an update frequency of 1. If those are set differently, this should be
+    # set to False to prevent calculation issues.
+    EXPECTED_OUTPUT_DIFF: True
+
+  OutputNeuronDendriteProgramOutputs:
+    STRONGEST_INPUT_CLOSER_FURTHER: True
+    NEAREST_AXON_CLOSER_FURTHER: True
+    RANDOM_MOVEMENT_THRESHOLD: True
+    CLOSER_TO_STRONGEST_INPUT: False
+    CLOSER_TO_NEAREST_AXON: False
+    WEIGHT: False # Change to the weight applied to the input
+    WEIGHT_HIGHER_LOWER: True # Similar to ..._CLOSER_FURTHER parameters
+    LOCATION: False # 3 outputs: deltas for X, Y, and Z.
+    HEALTH: False # Change in health; DENDRITE HEALTH NOT CURRENTLY IMPLEMENTED.
 
   AxonProgramInputs:
     SAGE_MATCH_PERCENT: True   
@@ -392,7 +438,7 @@ Equation:
   # Frequency dictates how many times the update event must occur between
   # update programs running. 1 means every time.
   MinUpdateProgramsFrequency: 1
-  MaxUpdateProgramsFrequency: 3
+  MaxUpdateProgramsFrequency: 1
 
   # Each CGP Node needs to be constrained so values don't grow or shrink out of control:
   # It is also important to set these values such that MinHighConstraint > MaxLowConstraint
@@ -412,6 +458,7 @@ Equation:
   # How many CGP neurons will be allocated per program to start.
   # If FrameShift CGP is used, the CGP program may self-modify this number:
   DendriteProgramCGPNodes: 200
+  OutputDendriteProgramCGPNodes: 200
   AxonProgramCGPNodes: 200
   NeuronProgramCGPNodes: 200
 
@@ -466,12 +513,12 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: BiggerTest 
+  ExperimentName: OutputNeurons_Experiment
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
   TrainTrials: 190
   TestTrials: 10  # At least 1 to prevent division by 0 problems elsewhere
-  MaximumEpochs: 1000
+  MaximumEpochs: 100
  
   StartingPopulationSize: 15
 
