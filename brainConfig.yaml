@@ -225,7 +225,7 @@ Brain:
   MaxMaxStartingNeurons: 12
 
   # To prevent neuron-explosion from bad brain mutations, set a max count:
-  MaxNeuronCount: 80
+  MaxNeuronCount: 150
 
 Circuit:  
   ########## Need something for creating and destroying circuits.  Random? Health? Require certain amount?
@@ -513,12 +513,20 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: OutputNeurons_Experiment
+  ExperimentName: TestExperimentRestart
+
+  # If "None", the directory for this experiment will be dynamically generated and the
+  # experiment will start. If not "None", this is expected to be the absolute path to
+  # the directory of an experiment in progress. Setting this value to a folder will
+  # make all other parameters in this yaml file irrelevant. A copy of the yaml which
+  # described the experiment is in the folder and will be used.
+  ExperimentDirectory: D:\Sync\PhD\ExperimentData\TestExperimentRestart_2024-09-25_13-34-21
+  
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
   TrainTrials: 190
   TestTrials: 10  # At least 1 to prevent division by 0 problems elsewhere
-  MaximumEpochs: 100
+  MaximumEpochs: 200
  
   StartingPopulationSize: 15
 
@@ -536,7 +544,7 @@ Experiment:
   # multiplier for each new reward type. These reward equations will be
   # hardcoded in the test app. It is important to take this section of rewards
   # into account when setting the maximum reward above:
-  Reward_TestPercentSageMatch: 1.0  # Percent between 0.0 and 1.0
+  Reward_TestPercentSageMatch: 1.0 # Percent between 0.0 and 1.0
   Reward_AllTrendlineSlope: 1.0
-  Reward_TestMaxMinPercentDiff: -0.5
+  Reward_TestMaxMinPercentDiff: -0.0
   Reward_PenaltyForBrainCrash: -2.0  # Added to the score if the brain has no neurons.

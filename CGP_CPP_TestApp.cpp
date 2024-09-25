@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <iterator>
 #include <fstream>
 #include <vector>
 #include <functional>
@@ -427,6 +428,55 @@ double testOneBrain(JBrain::JBrain* brain, Experiment::GymSageRunner* sageRunner
     */
 }
 
+void getInfoFromInProgressExperiment(const std::string& directory,
+    int& previousEpoch, JBrain::JBrain*& parent)
+{
+    previousEpoch = 0;
+    parent = nullptr;
+
+    // Open the CSV from the data directory for reading:
+    std::ifstream csv(directory + "\\experimentSummary.csv");
+    if (!csv)
+    {
+        std::cout << "experimentSummary.csv not found in " << directory << std::endl;
+        return;
+    }
+
+    std::string line;
+    std::string prevLine;
+    std::string cell;
+
+    // Read in lines until we reach the bottom of the csv:
+    while (std::getline(csv, line)) { prevLine = line; }
+
+    // The final line should now be in "line":
+    line = prevLine;
+
+    // Get what we need from the line:
+    std::istringstream lineStream(line);
+    std::string brainFileName = "";
+    unsigned int idx = 0;
+
+    // This function will need to be changed if the column index of 
+    // the epoch (0) or the best brain (2) changes:
+    while(std::getline(lineStream, cell, ','))
+    {
+        if (idx == 0)
+            previousEpoch = std::stoi(cell);
+
+        else if (idx == 2)
+        {
+            std::ifstream jsonInFile(brainFileName = directory + "\\" + cell + "_final.json");
+            auto brainJson = json::parse(jsonInFile);
+            jsonInFile.close();
+
+            parent = JBrain::JBrain::getBrainFromJson(brainJson);
+            break;
+        }
+        ++idx;
+    }
+}
+
 int testFullExperiment(std::string yamlFileName)
 {
     YAML::Node fullConfig = YAML::LoadFile(yamlFileName);
@@ -439,35 +489,61 @@ int testFullExperiment(std::string yamlFileName)
         return -1;
     }
 
-    std::string mainDir = expConfig["MainDataDirectory"].as<std::string>();
-    std::string expName = expConfig["ExperimentName"].as<std::string>();
+    std::string dataDir;
 
-    // I can't believe C++ has its head up its ass so far that this is required
-    // to get the friggen local time:
-    auto now = std::chrono::system_clock::now();
-    time_t t = std::chrono::system_clock::to_time_t(now);
-    std::tm tm{};
+    // If an experiment-in-progress was provided, use it:
+    bool expInProgress = false;
+    JBrain::JBrain* parent = nullptr;
+    int prevEpoch = -1;
+    std::string expDir = expConfig["ExperimentDirectory"].as<std::string>();
+    if (expDir != "None")
+    {
+        expInProgress = true;
+        dataDir = expDir;
+
+        // Load up the new yaml and change the yamlFileName:
+        yamlFileName = dataDir + "\\experimentConfigFile.yaml";
+        fullConfig = YAML::LoadFile(yamlFileName);
+        expConfig = fullConfig["Experiment"];
+
+        getInfoFromInProgressExperiment(dataDir, prevEpoch, parent);
+    }
+    else // Need to build the directory:
+    {
+        std::string mainDir = expConfig["MainDataDirectory"].as<std::string>();
+        std::string expName = expConfig["ExperimentName"].as<std::string>();
+
+        // I can't believe C++ has its head up its ass so far that this is required
+        // to get the friggen local time:
+        auto now = std::chrono::system_clock::now();
+        time_t t = std::chrono::system_clock::to_time_t(now);
+        std::tm tm{};
 #if defined(__unix__)
-    localtime_r(&t, &tm);
+        localtime_r(&t, &tm);
 #else
-    localtime_s(&tm, &t);
+        localtime_s(&tm, &t);
 #endif
 
-    // Get the date-time as a string for a unique experiment directory name:
-    char buffer[80];
-    strftime(buffer, sizeof(buffer), "_%Y-%m-%d_%H-%M-%S", &tm);
+        // Get the date-time as a string for a unique experiment directory name:
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "_%Y-%m-%d_%H-%M-%S", &tm);
 
-    // Combine them into a single directory name:
-    std::string dataDir = mainDir + expName + std::string(buffer) + "\\";
-    std::filesystem::create_directories(dataDir);
+        // Combine them into a single directory name:
+        dataDir = mainDir + expName + std::string(buffer) + "\\";
+        std::filesystem::create_directories(dataDir);
 
-    // Copy our configuration file into the experiment directory:
-    std::filesystem::copy_file(yamlFileName, dataDir + "experimentConfigFile.yaml");
- 
-    // Create a full experiment CSV:
+        // Copy our configuration file into the experiment directory:
+        std::filesystem::copy_file(yamlFileName, dataDir + "experimentConfigFile.yaml");
+    }
+
+    // Create a full experiment CSV, even if we have nothing to write right now:
     std::string csvFName = dataDir + "experimentSummary.csv";
     std::ofstream csvOut(csvFName.c_str());
-    csvOut << "epoch,bestScore,bestBrain,bestParent,bestNeuronCount,trainingSeconds" << std::endl;
+
+    // Write the header if we're just getting started:
+    if (!expInProgress)
+        csvOut << "epoch,bestScore,bestBrain,bestParent,bestNeuronCount,trainingSeconds" << std::endl;
+
     csvOut.close();  // Reopen for each write since they are infrequent.
 
     Experiment::GymSageRunner* sageRunner = Experiment::GymSageRunner::getInstance();
@@ -479,12 +555,26 @@ int testFullExperiment(std::string yamlFileName)
     factory->initialize(yamlFileName);
     
     unsigned int startPop = expConfig["StartingPopulationSize"].as<unsigned int>();
-
-    std::cout << "Getting " << startPop << " random sample brains..." << std::endl;
     std::vector<JBrain::JBrain*> population;
-    for (unsigned int i = 0; i < startPop; ++i)
-        population.push_back(factory->getRandomBrain());
-    
+
+    if (expInProgress)
+    {
+        std::cout << "Generating population from previous best brain..." << std::endl;
+        // New brain number to start from:
+        std::string brainName = parent->getName();
+        unsigned int nextBrainNumber = static_cast<unsigned int>(
+            std::stoi(brainName.substr(1)));
+
+        factory->setNextBrainNumber(nextBrainNumber + 1);
+        population = factory->getFullMutatedPopulation(parent);
+    }
+    else
+    {
+        std::cout << "Getting " << startPop << " random sample brains..." << std::endl;
+        for (unsigned int i = 0; i < startPop; ++i)
+            population.push_back(factory->getRandomBrain());
+    }
+
     unsigned int trainingEpochs = expConfig["MaximumEpochs"].as<unsigned int>();
     std::vector<double> allRewards;
     double endReward = expConfig["MaximumReward"].as<double>();
@@ -506,8 +596,7 @@ int testFullExperiment(std::string yamlFileName)
     std::vector<double> brainAct;
     bool done = false;
     float reward = 0.0;
-    JBrain::JBrain* parent;
-    for (unsigned int i = 0; i < trainingEpochs; ++i)
+    for (unsigned int i = static_cast<unsigned int>(prevEpoch + 1); i < trainingEpochs; ++i)
     {
         auto start = std::chrono::high_resolution_clock::now();
         
