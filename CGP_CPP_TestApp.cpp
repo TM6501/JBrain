@@ -502,7 +502,7 @@ int testFullExperiment(std::string yamlFileName)
         dataDir = expDir;
 
         // Load up the new yaml and change the yamlFileName:
-        yamlFileName = dataDir + "\\experimentConfigFile.yaml";
+        yamlFileName = dataDir + "experimentConfigFile.yaml";
         fullConfig = YAML::LoadFile(yamlFileName);
         expConfig = fullConfig["Experiment"];
 
@@ -538,7 +538,7 @@ int testFullExperiment(std::string yamlFileName)
 
     // Create a full experiment CSV, even if we have nothing to write right now:
     std::string csvFName = dataDir + "experimentSummary.csv";
-    std::ofstream csvOut(csvFName.c_str());
+    std::ofstream csvOut(csvFName.c_str(), std::ios_base::app);  // Append if it exists already.
 
     // Write the header if we're just getting started:
     if (!expInProgress)
@@ -733,7 +733,7 @@ int testGymSageRunner()
     auto end = std::chrono::high_resolution_clock::now();
 
     float averageReward = static_cast<float>(std::accumulate(allRewards.begin(),
-        allRewards.end(), 0)) / static_cast<float>(timesToRun);
+        allRewards.end(), 0) / timesToRun);
 
     std::cout << timesToRun << " runs through CartPole-v1 took " <<
         std::chrono::duration_cast<std::chrono::seconds>(end - start).count() <<

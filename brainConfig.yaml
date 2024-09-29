@@ -520,8 +520,9 @@ Experiment:
   # the directory of an experiment in progress. Setting this value to a folder will
   # make all other parameters in this yaml file irrelevant. A copy of the yaml which
   # described the experiment is in the folder and will be used.
-  ExperimentDirectory: D:\Sync\PhD\ExperimentData\TestExperimentRestart_2024-09-25_13-34-21
-  
+  # It is important that the path here ends with a backslash.
+  ExperimentDirectory: D:\Sync\PhD\ExperimentData\TestExperimentRestart_2024-09-25_13-34-21\
+
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
   TrainTrials: 190
