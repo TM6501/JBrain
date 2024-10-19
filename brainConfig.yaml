@@ -213,9 +213,16 @@ Brain:
   # The number of time steps between when the environmental inputs are
   # provided to the brain and when the brain's outputs are read and given
   # back to the environment. 0 would indicate that the inputs are set
-  # and outputs read simultaneously, giving none of the neurons time to fire:
+  # and outputs read simultaneously, giving none of the neurons time to fire.
   MinProcessingTimeStepsBetweenInputAndOutput: 2
   MaxProcessingTimeStepsBetweenInputAndOutput: 9
+
+  # The number of outputs to read and average together.
+  # ProcessingTimeStepsBetweenInputAndOutput will be the last output
+  # time step to record data. A value of 1 below indicates that it will
+  # only be read once. If this is greater than the number of
+  MinOutputTimeStepsToAverageTogether: 1
+  MaxOutputTimeStepsToAverageTogether: 4
 
   # Brains have some residual changes that persist after an input
   # has been processed. If this value is true, the brain will set all
@@ -233,45 +240,6 @@ Brain:
 
   # To prevent neuron-explosion from bad brain mutations, set a max count:
   MaxNeuronCount: 150
-
-Circuit:  
-  ########## Need something for creating and destroying circuits.  Random? Health? Require certain amount?
-  #########  Possibly kill circuit when too few neurons remain? Split circuits with too many?
-  MinMinDimension: 0.5
-  MaxMinDimension: 0.5
-  MinMaxDimension: 1.1
-  MaxMaxDimension: 1.1 
-  UseSameValueForAllDimensions: True
-  
-  MinMinCircuitCount: 3
-  MaxMinCircuitCount: 3
-  MinMaxCircuitCount: 10
-  MaxMaxCircuitCount: 10
-  MinProbabilityIndividualCircuitIsPassedToChild: 0.5
-  MaxProbabilityIndividualCircuitIsPassedToChild: 0.5
-  
-  # These values change the firing threshold OR the outcome of the
-  # probability check to see if the neuron fires based. It is cumulative,
-  # meaning as more and more neurons in the same circuit fire, the chances
-  # of additional neurons in the same circuit firing goes up.
-  MinFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: 0.0
-  MaxFireProbabilityChangeDueToOtherNeuronsInTheSameCircuitFiring: 0.0
-
-  # This is the chance that if a neuron is in a circuit and duplicates
-  # whether that neuron will be guaranteed to appear in the same circuit.
-  # This value will override the duplicate-nearby parameters found in the
-  # neuron section:
-  MinNeuronDuplicatesInSameCircuit: 0.5
-  MaxNeuronDuplicatesInSameCircuit: 0.5
-
-  # These variables will dictate how neurons health are changed
-  # based on the death or duplication of neurons in their shared circuit:
-  MinNeuronHealthChangeFromDeath: 0.0
-  MaxNeuronHealthChangeFromDeath: 0.0
-  MinNeuronHealthChangeFromDuplication: 0.0
-  MaxNeuronHealthChangeFromDuplication: 0.0
-
-  CircuitsCanOverlap: False
 
 Equation:
   # SageAlgorithm: PPO
@@ -520,7 +488,7 @@ Equation:
 # data is stored:
 Experiment:
   MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TestStaticNeurons
+  ExperimentName: TestOutputAveraging
 
   # If "None", the directory for this experiment will be dynamically generated and the
   # experiment will start. If not "None", this is expected to be the absolute path to
