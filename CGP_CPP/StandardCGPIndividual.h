@@ -3,7 +3,7 @@
 #include "BasicGene.h"
 #include <vector>
 #include <functional>
-#include "json.hpp"
+#include "JsonLib/json.hpp"
 using json = nlohmann::json;
 
 namespace CGP

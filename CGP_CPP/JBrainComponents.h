@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <numeric>
 
 // JBrain components will all be structures. They are meant to be used
 // and manipulated freely by the JBrains that create them.

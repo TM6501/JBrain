@@ -4,7 +4,7 @@
 #include "CGPFunctions.h"
 #include <random>
 #include <iostream>
-#include "json.hpp"
+#include "JsonLib/json.hpp"
 using json = nlohmann::json;
 
 namespace CGP
@@ -129,7 +129,7 @@ namespace CGP
 	}
 
 	JBrainCGPIndividual::~JBrainCGPIndividual()
-	{}
+	{}  // NOTE: This line crashed, once.  There may be some deeply hidden allocation/deallocation issue.
 
 	void JBrainCGPIndividual::calculateActiveGenes()
 	{

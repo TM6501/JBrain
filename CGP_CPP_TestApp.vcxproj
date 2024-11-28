@@ -90,8 +90,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\Sync\JsonLib;C:\Program Files\Python310\include;D:\Sync\CGym;D:\Sync\CGP_CPP_TestApp\CGP_CPP;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Python310\libs;D:\Sync\CGP_CPP_TestApp\x64\Release;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>C:\Sync\CPP_Libraries;C:\Program Files\Python310\include;C:\Sync\CGym;C:\Sync\CGP_CPP_TestApp\CGP_CPP;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\Python310\libs;C:\Sync\CGP_CPP_TestApp\x64\Release;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Sync\CPP_Libraries\yaml-cpp-yaml-cpp-0.7.0\include;D:\Sync\ExperimentRunner;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Sync\CPP_Libraries\yaml-cpp-yaml-cpp-0.7.0\include;C:\Sync\ExperimentRunner;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -171,9 +171,9 @@
     <None Include="CGym_Dungeon.yaml" />
     <None Include="CGym_SimpleRepeat.yaml" />
     <None Include="Makefile" />
-    <None Include="multiTest.yaml" />
     <None Include="percepInput_CartPole.yaml" />
     <None Include="PyGym_CartPole.yaml" />
+    <None Include="staticNeurons.json" />
     <None Include="testExperiment.yaml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

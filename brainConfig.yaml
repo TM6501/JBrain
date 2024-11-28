@@ -203,6 +203,11 @@ Brain:
   MaxDimension: 10.0
   UseSameValueForAllDimensions: True
 
+  # If OutputsIgnoreInputs is set to true, the calculations that determine
+  # the input values to the output neurons' dendrites and output dendrites will
+  # ignore all values from the input axons.
+  OutputsIgnoreEnvironmentInputs: True
+
   # Instead of having a simple output dendrite, use an output neuron.
   # These output neurons' dendrites' will have their own CGP updater separate
   # from the CGP programs used elsewhere. This parameter must be True or False,
@@ -228,7 +233,7 @@ Brain:
   # has been processed. If this value is true, the brain will set all
   # neurons to a blank slate between inputs. Otherwise, persistent changes,
   # such as refractory time, will persist:
-  ResetBeforeProcessingInput: True  # Not yet implemented
+  ResetBeforeProcessingInput: True
   
   # Chance for any given neuron that it will be recreated in its child's
   # brain. All other neurons are random:
@@ -337,7 +342,7 @@ Equation:
     # This assumes we'll keep using brain-output as the update trigger and
     # an update frequency of 1. If those are set differently, this should be
     # set to False to prevent calculation issues.
-    EXPECTED_OUTPUT_DIFF: True
+    # EXPECTED_OUTPUT_DIFF: True
 
   OutputNeuronDendriteProgramOutputs:
     STRONGEST_INPUT_CLOSER_FURTHER: True
@@ -487,8 +492,8 @@ Equation:
 # These are variables related to how the experiment is set up and where the
 # data is stored:
 Experiment:
-  MainDataDirectory: D:\Sync\PhD\ExperimentData\
-  ExperimentName: TestOutputAveraging
+  MainDataDirectory: C:\Sync\PhD\ExperimentData\
+  ExperimentName: TestNewComputer
 
   # If "None", the directory for this experiment will be dynamically generated and the
   # experiment will start. If not "None", this is expected to be the absolute path to
@@ -500,9 +505,9 @@ Experiment:
 
   # Some reward functions base their grade on only the scores during the 
   # test trials, so we separate from training trials:
-  TrainTrials: 190
+  TrainTrials: 10
   TestTrials: 10  # At least 1 to prevent division by 0 problems elsewhere
-  MaximumEpochs: 200
+  MaximumEpochs: 20
  
   StartingPopulationSize: 15
 

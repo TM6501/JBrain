@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\Sync\JsonLib;C:\Program Files\Python310\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\Sync\CPP_Libraries;C:\Program Files\Python310\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Python310\libs;D:\Sync\CGP_CPP_TestApp\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -175,7 +175,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>D:\Sync\CGym;D:\Sync\ExperimentRunner;D:\Sync\CPP_Libraries\yaml-cpp-yaml-cpp-0.7.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Sync\CGym;C:\Sync\ExperimentRunner;C:\Sync\CPP_Libraries\yaml-cpp-yaml-cpp-0.7.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -189,7 +189,7 @@
       <AdditionalDependencies>yaml-cpp.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>D:\Sync\CPP_Libraries\yaml-cpp-yaml-cpp-0.7.0\build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Sync\CPP_Libraries\yaml-cpp-yaml-cpp-0.7.0\build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
