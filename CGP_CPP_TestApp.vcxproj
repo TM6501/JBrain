@@ -173,6 +173,7 @@
     <None Include="Makefile" />
     <None Include="percepInput_CartPole.yaml" />
     <None Include="PyGym_CartPole.yaml" />
+    <None Include="snapBrainConfig.yaml" />
     <None Include="staticNeurons.json" />
     <None Include="testExperiment.yaml" />
   </ItemGroup>

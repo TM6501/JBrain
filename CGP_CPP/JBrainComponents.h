@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cmath>
 #include <numeric>
+#include <algorithm>
+#include "Enums.h"
 
 // JBrain components will all be structures. They are meant to be used
 // and manipulated freely by the JBrains that create them.
@@ -206,5 +208,48 @@ namespace JBrain
 			}
 			out << "### End neuron " << m_neuronNumber << " ###" << std::endl;
 		}
+	};
+
+	// Neurons designed for working with the snap-paradigm JBrains
+	struct JNeuron_Snap
+	{
+		CGP::JNEURON_SNAP_TYPE m_type;
+		unsigned int m_neuronNumber;
+		unsigned int m_age;
+		double m_fireThreshold;
+
+		// Our dendrite connections. For input neurons, these values refer to input numbers instead
+		// of neuron numbers:
+		std::vector<unsigned int> m_inputNeurons;
+		std::vector<double> m_inputWeights;
+
+		// Track our outputs for event capture details:
+		std::vector<unsigned int> m_outputNeurons;
+
+		// Track when we fired:
+		std::vector<unsigned int> m_fireSteps;
+
+		// Make it easier to get when we fired:
+		bool getFiredOnStepNum(const unsigned int& stepNum)
+		{
+			return (std::find(m_fireSteps.begin(), m_fireSteps.end(), stepNum) != m_fireSteps.end());
+		}
+
+		// Drop one of this neuron's inputs:
+		void dropInput(const unsigned int& neuronNumber)
+		{
+			auto iter = std::find(m_inputNeurons.begin(), m_inputNeurons.end(), neuronNumber);
+			if (iter != m_inputNeurons.end())
+			{
+				unsigned int idx = static_cast<unsigned int>(iter - m_inputNeurons.begin());
+				m_inputWeights.erase(m_inputWeights.begin() + idx);
+				m_inputNeurons.erase(iter);
+			}
+		}
+
+		JNeuron_Snap(const CGP::JNEURON_SNAP_TYPE& type, const unsigned int& neuronNumber,
+			const double& fireThreshold)
+			: m_type(type), m_neuronNumber(neuronNumber), m_age(0), m_fireThreshold(fireThreshold)
+		{}
 	};
 }

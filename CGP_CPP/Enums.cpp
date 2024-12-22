@@ -5,6 +5,85 @@
 
 namespace CGP
 {
+	std::string DynamicProbabilityToString(DYNAMIC_PROBABILITY x)
+	{
+		std::string retVal = "UNDEFINED";
+		switch (x)
+		{
+		case DYNAMIC_PROBABILITY::ADD:
+			retVal = "ADD";
+			break;
+
+		case DYNAMIC_PROBABILITY::SOLO:
+			retVal = "SOLO";
+			break;
+
+		case DYNAMIC_PROBABILITY::MULTIPLY:
+			retVal = "MULTIPLY";
+			break;
+
+		case DYNAMIC_PROBABILITY::UNUSED:
+			retVal = "UNUSED";
+			break;
+		}
+
+		return retVal;
+	}
+
+	DYNAMIC_PROBABILITY StringToDynamicProbability(std::string in)
+	{
+		DYNAMIC_PROBABILITY retVal = DYNAMIC_PROBABILITY::UNDEFINED;
+
+		std::transform(in.begin(), in.end(), in.begin(), toupper);
+
+		if (in == "ADD")
+			retVal = DYNAMIC_PROBABILITY::ADD;
+		else if (in == "SOLO")
+			retVal = DYNAMIC_PROBABILITY::SOLO;
+		else if (in == "MULTIPLY")
+			retVal = DYNAMIC_PROBABILITY::MULTIPLY;
+		else if (in == "UNUSED")
+			retVal = DYNAMIC_PROBABILITY::UNUSED;
+
+		return retVal;
+	}
+
+	std::string InputPreprocessingToString(INPUT_PREPROCESSING x)
+	{
+		std::string retVal = "UNDEFINED";
+		switch (x)
+		{
+		case INPUT_PREPROCESSING::NO_CHANGE:
+			retVal = "NO_CHANGE";
+			break;
+
+		case INPUT_PREPROCESSING::BUCKETS:
+			retVal = "BUCKETS";
+			break;
+
+		case INPUT_PREPROCESSING::NEGATIVE_VALUE_ADD:
+			retVal = "NEGATIVE_VALUE_ADD";
+			break;
+		}
+		return retVal;
+	}
+
+	INPUT_PREPROCESSING StringToInputPreprocessing(std::string in)
+	{
+		INPUT_PREPROCESSING retVal = INPUT_PREPROCESSING::UNDEFINED;
+
+		std::transform(in.begin(), in.end(), in.begin(), toupper);
+
+		if (in == "NO_CHANGE")
+			retVal = INPUT_PREPROCESSING::NO_CHANGE;
+		else if (in == "BUCKETS")
+			retVal = INPUT_PREPROCESSING::BUCKETS;
+		else if (in == "NEGATIVE_VALUE_ADD")
+			retVal = INPUT_PREPROCESSING::NEGATIVE_VALUE_ADD;
+
+		return retVal;
+	}
+
 	std::string ActivationFunctionToString(JNEURON_ACTIVATION_FUNCTION x)
 	{
 		std::string retVal = "NONE";
@@ -69,6 +148,41 @@ namespace CGP
 			retVal = UPDATE_EVENT::BRAIN_OUTPUT;
 		else if (in == "TIME_STEP")
 			retVal = UPDATE_EVENT::TIME_STEP;
+
+		return retVal;
+	}
+
+	std::string JneuronSnapTypeToString(JNEURON_SNAP_TYPE x)
+	{
+		std::string retVal = "UNDEFINED";
+		switch (x)
+		{
+		case JNEURON_SNAP_TYPE::INPUT:
+			retVal = "INPUT";
+			break;
+		case JNEURON_SNAP_TYPE::PROCESSING:
+			retVal = "PROCESSING";
+			break;
+		case JNEURON_SNAP_TYPE::OUTPUT:
+			retVal = "OUTPUT";
+			break;
+		}
+
+		return retVal;
+	}
+
+	JNEURON_SNAP_TYPE StringToJneuronSnapType(std::string in)
+	{
+		JNEURON_SNAP_TYPE retVal = JNEURON_SNAP_TYPE::UNDEFINED;
+
+		std::transform(in.begin(), in.end(), in.begin(), toupper);
+
+		if (in == "INPUT")
+			retVal = JNEURON_SNAP_TYPE::INPUT;
+		else if (in == "PROCESSING")
+			retVal = JNEURON_SNAP_TYPE::PROCESSING;
+		else if (in == "OUTPUT")
+			retVal = JNEURON_SNAP_TYPE::OUTPUT;
 
 		return retVal;
 	}

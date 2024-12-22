@@ -42,6 +42,7 @@ using json = nlohmann::json;
 #include "Experiment.h"
 #include "MultiExperiment.h"
 #include "JBrainFactory.h"
+#include "ObservationProcessor.h"
 #include "JBrain.h"
 #include "iostream"
 #include "fstream"
@@ -705,13 +706,460 @@ int testMutation()
     return 0;
 }
 
-int main(int argc, char** argv)
+#include <random>
+#include <numeric>
+int testProbabilitySelection()
 {
-    // return testBrainCartPole("brainConfig.yaml");
-    // return testBrainCreationAndPrintOut();
-    // return testMutation();
-    return testFullExperiment("brainConfig.yaml");
-    // return testGymSageRunner();
+  std::mt19937_64 gen(std::random_device{}());
+  std::vector<unsigned int> chances{ 1, 1, 1, 1, 1 };
+  std::vector<unsigned int> selections(5);
+  std::iota(selections.begin(), selections.end(), 0);
+
+  std::discrete_distribution<std::size_t> dist{ chances.begin(), chances.end() };
+
+  std::cout << "Selecting 1000 values: ";
+  for (unsigned int i = 0; i < 100; ++i)
+    std::cout << selections[dist(gen)] << ", ";
+  std::cout << selections[dist(gen)] << std::endl;
+
+  return 0;
 }
 
+#include "ObservationProcessor.h"
+#include <cstdlib>
+int testObservationProcessor()
+{
+  std::vector<std::vector<double> > ranges{
+    std::vector<double>{-2.4f, 2.4f},
+    std::vector<double>{-1.0f, 1.0f},
+    std::vector<double>{-0.3f, 0.3f},
+    std::vector<double>{-1.0f, 1.0f}
+  };
+
+  JBrain::ObservationProcessor obProc_std(CGP::INPUT_PREPROCESSING::NO_CHANGE, 4);
+  JBrain::ObservationProcessor obProc_buckets(CGP::INPUT_PREPROCESSING::BUCKETS, 4, ranges, 5);
+  JBrain::ObservationProcessor obProc_absNeg(CGP::INPUT_PREPROCESSING::NEGATIVE_VALUE_ADD, 4);
+
+  std::vector<double> observation;
+  double x;
+  std::vector<double> stdOut;
+  std::vector<double> bucketOut;
+  std::vector<double> absOut;
+  while (true)
+  {
+    observation.clear();
+    std::cout << "4 input values: ";
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+      std::cin >> x;
+      observation.push_back(x);
+    }
+
+    stdOut = obProc_std.processInput(observation);
+    bucketOut = obProc_buckets.processInput(observation);
+    absOut = obProc_absNeg.processInput(observation);
+
+    std::cout << "Input vector: ";
+    for (double elem : observation)
+      std::cout << elem << " ";
+    std::cout << std::endl;
+
+    std::cout << "Standard processing: ";
+    for (double elem : stdOut)
+      std::cout << elem << " ";
+    std::cout << std::endl;
+
+    std::cout << "Bucket processing: ";
+    for (double elem : bucketOut)
+      std::cout << elem << " ";
+    std::cout << std::endl;
+
+    std::cout << "AbsNeg processing: ";
+    for (double elem : absOut)
+      std::cout << elem << " ";
+    std::cout << std::endl;
+  }
+
+  return 0;
+}
+
+int testNeuronSearch()
+{
+  std::vector<JBrain::JNeuron_Snap*> neuronVector;
+  for (unsigned int i = 0; i < 15; ++i)
+  {
+    neuronVector.push_back(new JBrain::JNeuron_Snap(CGP::JNEURON_SNAP_TYPE::PROCESSING,
+      i, 1.5));
+  }
+
+  unsigned int nSearch = 0;
+  
+  while (nSearch < 100)  // Easy stop condition
+  {
+    std::cout << "Searching for neuron (101 to stop): ";
+    std::cin >> nSearch;
+    if (nSearch >= 100)
+      break;
+
+    auto it = std::find_if(neuronVector.begin(), neuronVector.end(),
+      [nSearch](JBrain::JNeuron_Snap* x) {return x->m_neuronNumber == nSearch; });
+
+    if (it != neuronVector.end())
+    {
+      unsigned int idx = static_cast<unsigned int>(it - neuronVector.begin());
+      std::cout << "Found it at index " << idx << ". Deleting it." << std::endl;
+      delete neuronVector[idx];
+      neuronVector.erase(neuronVector.begin() + idx);
+    }
+    else
+      std::cout << "Didn't find it." << std::endl;
+  }
+
+  return 0;
+}
+
+bool getEventHappened(double probability)
+{
+  // Random device and distribution don't need to be
+  // recreated every time:
+  static std::random_device rd;
+  static std::mt19937_64 eng(rd());
+  static std::uniform_real_distribution<double> distr(0.0, 1.0);
+
+  if (distr(eng) <= probability)
+    return true;
+  else
+    return false;
+}
+
+int testProbability()
+{
+  unsigned int timesToCheck = 10000000;
+  std::vector<double> probsToCheck{ 0.0, 1.0, 0.5, 0.99, 0.01, 0.0001, 0.999, 0.25, 0.75 };
+
+  unsigned int happenedCount;
+  for (auto& prob : probsToCheck)
+  {
+    happenedCount = 0;
+    for (unsigned int i = 0; i < timesToCheck; ++i)
+      if (getEventHappened(prob))
+        ++happenedCount;
+
+    std::cout << "Event with probability of " << prob * 100.0
+      << "% happened approximately "
+      << (static_cast<double>(happenedCount) / static_cast<double>(timesToCheck)) * 100.0
+      << "% of the time." << std::endl;
+  }
+
+  return 0;
+}
+
+double testSnapJBrain(JBrain::JBrain_Snap* brain, Experiment::GymSageRunner* sageRunner,
+  const std::string& dataDir, const unsigned int& trainingRuns, const unsigned int& testingRuns,
+  const double& reward_testNoOutput, const double& reward_testPercentGoodOutput,
+  const double& reward_testPercentBadOutput, const double& reward_testMaxScorePercent,
+  const double& reward_testBestMinusMin, const double& reward_testProcChurn,
+  const double& reward_testInputChurn)
+{
+  // Let it run and hopefully learn:    
+  std::vector<double> rewards;
+  std::vector<double> testRewards;
+  std::vector<double> obs;
+  std::vector<double> sageAct;
+  int sageChoice;
+  std::vector<double> brainAct;
+  std::vector<double> brainActIn{ 0.0 };  // The action passed to the step function.
+  bool done = false;
+  float reward = 0.0;
+  static double MAX_REWARD = 500.0; // Hardcoded for cartpole-v1
+  unsigned int testSageMatchChances = 0;
+  unsigned int testSageMatches_temp = 0;
+  unsigned int testSageMatches_full = 0;
+  unsigned int testSageDiffs_temp = 0;
+  unsigned int testSageDiffs_full = 0;
+  unsigned int noOutputEvents_temp = 0;
+  unsigned int noOutputEvents_full = 0;
+  unsigned int procCreated_temp = 0;
+  unsigned int procDestroyed_temp = 0;
+  unsigned int procCreatedOrDestroyed_full = 0;
+  unsigned int inputCreated_temp = 0;
+  unsigned int inputDestroyed_temp = 0;
+  unsigned int inputCreatedOrDestroyed_full = 0;
+  
+  // Initialize the brain's output:
+  brain->initializeCSVOutputFile(dataDir);
+  
+  for (unsigned int i = 0; i < trainingRuns + testingRuns; ++i)
+  {
+    done = false;
+    sageRunner->reset();
+    sageRunner->getAllStatus(obs, sageAct, done, reward);
+
+    // std::cout << "Trial " << i + 1 << ": ";
+    while (!done)
+    {
+      // Simple environment, sage choice is 0 or 1:
+      sageChoice = 0;
+      if (sageAct[0] > 0.5)
+        sageChoice = 1;
+
+      // Let the brain decide what to do:
+      // std::cout << ".";
+      brainAct = brain->processInput(obs, sageChoice);      
+
+      // std::cout << "[" << brainAct[0] << ", " << brainAct[1] << "] ";
+      // The environment expects a single element double vector with
+      // 0 and 1 being the only acceptable values:
+      brainActIn[0] = 0; // Assume 0, change if needed:
+      if (brainAct[1] > brainAct[0])
+        brainActIn[0] = 1.0;
+
+      // Record how often we had the chance to choose correctly during test runs:
+      if (i >= trainingRuns)
+        ++testSageMatchChances;
+
+      sageRunner->step(brainActIn);
+
+      // Gather information:
+      sageRunner->getAllStatus(obs, sageAct, done, reward);
+    }
+    
+    if (i >= trainingRuns)
+    {
+      testRewards.push_back(reward);
+
+      brain->getFullTrialStatistics(noOutputEvents_temp, testSageMatches_temp, testSageDiffs_temp,
+        procCreated_temp, procDestroyed_temp, inputCreated_temp, inputDestroyed_temp);
+      noOutputEvents_full += noOutputEvents_temp;
+      testSageMatches_full += testSageMatches_temp;
+      testSageDiffs_full += testSageDiffs_temp;
+      procCreatedOrDestroyed_full += procCreated_temp + procDestroyed_temp;
+      inputCreatedOrDestroyed_full += inputCreated_temp + inputDestroyed_temp;
+    }
+
+    brain->processEndOfTrial(reward, 0.0, MAX_REWARD);
+    
+    // std::cout << reward << " " << std::endl;   
+    rewards.push_back(reward);
+  }
+
+  brain->closeCSVOutputFile();
+
+  json jOut;
+  brain->writeSelfToJson(jOut);
+  std::string jsonName = dataDir + brain->getName() + "_final.json";
+  std::ofstream outFile(jsonName.c_str());
+  // outFile << std::setw(2) << jOut << std::endl; // Human readable
+  outFile << jOut << std::endl; // Save space
+  outFile.close();
+
+  // Full reward calculation:  
+  auto minMax = std::minmax_element(testRewards.begin(), testRewards.end());
+  double minScore = *minMax.first;
+  double maxScore = *minMax.second;
+  double scoreDiff = maxScore - minScore;
+  double percGoodOutput = static_cast<double>(testSageMatches_full) / static_cast<double>(testSageMatchChances);
+  double percBadOutput = static_cast<double>(testSageDiffs_full) / static_cast<double>(testSageMatchChances);
+  double percBestScore = maxScore / MAX_REWARD;  // Assumes for now that min-possible is zero. 
+  double percWorstScore = scoreDiff / MAX_REWARD;  // Change later if more general % is needed.
+  double procChurn = static_cast<double>(procCreatedOrDestroyed_full) / (2.0 * static_cast<double>(testSageMatchChances));
+  double inputChurn = static_cast<double>(inputCreatedOrDestroyed_full) / (2.0 * static_cast<double>(testSageMatchChances));
+
+  // fullReward = %GoodOutput + %BadOutput + (bestScore / MaxScore) + (worstScore / MaxScore) +
+  //              noOutputEventCount + procNeuronChurn + inputNeuronChurn.
+  // With each value having a multiplier, most likely negative for the bad characteristics:
+  double fullReward =
+    (percGoodOutput * reward_testPercentGoodOutput) +
+    (percBadOutput * reward_testPercentBadOutput) +
+    (percBestScore * reward_testMaxScorePercent) +
+    (percWorstScore * reward_testBestMinusMin) +
+    (static_cast<double>(noOutputEvents_full) * reward_testNoOutput) +
+    (procChurn * reward_testProcChurn) +
+    (inputChurn * reward_testInputChurn);
+
+  return fullReward;
+}
+
+int fullSnapTest(const std::string& filename)
+{
+  // Create our factory:
+  auto factory = JBrain::JBrainFactory::getInstance();
+  factory->initialize(filename);
+
+  // Create the gym runner:
+  std::cout << "Creating GymSageRunner..." << std::endl;
+  Experiment::GymSageRunner* sageRunner = Experiment::GymSageRunner::getInstance();
+  sageRunner->initialize(false, 4, 1); // useArgMax MUST be false:
+
+  // Gather the experiment variables:
+  YAML::Node expNode = factory->getExperimentConfig();
+  std::string mainDataDirectory = expNode["MainDataDirectory"].as<std::string>();
+  std::string expName = expNode["ExperimentName"].as<std::string>();
+  unsigned int trainTrials = expNode["TrainTrials"].as<unsigned int>();
+  unsigned int testTrials = expNode["TestTrials"].as<unsigned int>();
+  unsigned int maxEpochs = expNode["MaximumEpochs"].as<unsigned int>();
+  unsigned int startPopSize = expNode["StartingPopulationSize"].as<unsigned int>();
+  double maximumReward = expNode["MaximumReward"].as<double>();
+  double popInfusionReward = expNode["PopulationInfusionReward"].as<double>();
+  unsigned int popInfusionSize = expNode["PopulationInfusionSize"].as<unsigned int>();
+  double reward_testNoOutput = expNode["Reward_TestNoOutput"].as<double>();
+  double reward_testPercentGoodOutput = expNode["Reward_TestPercentGoodOutput"].as<double>();
+  double reward_testPercentBadOutput = expNode["Reward_TestPercentBadOutput"].as<double>();
+  double reward_testMaxScorePercent = expNode["Reward_TestMaxScorePercent"].as<double>();
+  double reward_testBestMinusMin = expNode["Reward_TestBestMinusMin"].as<double>();
+  double reward_testProcChurn = expNode["Reward_TestProcessingNeuronChurn"].as<double>();
+  double reward_testInputChurn = expNode["Reward_TestInputNeuronChurn"].as<double>();
+
+  JBrain::JBrain_Snap* parent = nullptr;
+
+  // Create our data directory. First: Extremely convoluted way to get current time:
+  std::string dataDir;
+  auto now = std::chrono::system_clock::now();
+  time_t t = std::chrono::system_clock::to_time_t(now);
+  std::tm tm{};
+#if defined(__unix__)
+  localtime_r(&t, &tm);
+#else
+  localtime_s(&tm, &t);
+#endif
+
+  // Get the date-time as a string for a unique experiment directory name:
+  char buffer[80];
+  strftime(buffer, sizeof(buffer), "_%Y-%m-%d_%H-%M-%S", &tm);
+
+  // Combine them into a single directory name:
+  dataDir = mainDataDirectory + expName + std::string(buffer) + "\\";
+  std::filesystem::create_directories(dataDir);
+
+  // Copy our configuration file into the experiment directory:
+  std::filesystem::copy_file(filename, dataDir + "experimentConfigFile.yaml");
+
+  // Create the full experiment CSV:
+  std::string csvFName = dataDir + "experimentSummary.csv";
+  std::ofstream csvOut(csvFName.c_str(), std::ios_base::app);
+
+  // Write the header and close. We re-open to append to prevent loss of data if the experiment crashes:
+  csvOut << "epoch,bestScore,bestBrain,bestParent,trainingSeconds" << std::endl;
+  csvOut.close();
+
+  std::vector<JBrain::JBrain_Snap*> population;
+
+  std::cout << "Getting " << startPopSize << " random sample brains..." << std::endl;
+  for (unsigned int i = 0; i < startPopSize; ++i)
+    population.push_back(factory->getRandomSnapBrain());
+
+  // Test the full population:
+  std::vector<double> allRewards;
+  double maxReward;
+  unsigned int maxIndex;
+  for (unsigned int epoch = 0; epoch < maxEpochs; ++epoch)
+  {
+    auto start = std::chrono::high_resolution_clock::now();
+    std::cout << "Beginning training on epoch " << epoch + 1 << " / " << maxEpochs;    
+    allRewards.clear();
+
+    for (auto brain : population)
+    {
+      allRewards.push_back(testSnapJBrain(brain, sageRunner, dataDir, trainTrials, testTrials,
+        reward_testNoOutput, reward_testPercentGoodOutput, reward_testPercentBadOutput,
+        reward_testMaxScorePercent, reward_testBestMinusMin, reward_testProcChurn,
+        reward_testInputChurn));
+      std::cout << ".";
+    }
+
+    maxReward = -100.0;
+    maxIndex = -1;
+    for (unsigned int idx = 0; idx < allRewards.size(); ++idx)
+    {
+      if (allRewards[idx] > maxReward)
+      {
+        maxReward = allRewards[idx];
+        maxIndex = idx;
+      }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+
+    // Gather the best:
+    parent = population[maxIndex];
+    std::cout << " Max reward: " << maxReward << " from brain " << parent->getName()
+      << ". Training took " << seconds << " seconds." << std::endl;
+
+    // Write out to the csv file:
+    csvOut.open(csvFName.c_str(), std::ios_base::app);
+    csvOut << epoch << ","
+      << maxReward << ","
+      << parent->getName() << ","
+      << parent->getParentName() << ","
+      << seconds << std::endl;
+    csvOut.close();
+
+    // Delete all but the best:
+    population.erase(population.begin() + maxIndex);
+    for (auto brain : population)
+      delete brain;
+
+    // Create the new generation:
+    population.clear();
+    population = factory->getFullMutatedPopulation(parent);
+
+    // Check if we're failing hard:
+    if (maxReward < popInfusionReward)
+    {
+      std::cout << "Poor overall performance. " << maxReward << " < " << popInfusionReward
+        << ". Adding " << popInfusionSize << " random individuals to the population." << std::endl;
+
+      for (unsigned int i = 0; i < popInfusionSize; ++i)
+        population.push_back(factory->getRandomSnapBrain());
+    }
+
+    // End the experiment early due to success:
+    if (maxReward > maximumReward)
+    {
+      std::cout << "Reward greater than " << maximumReward << " achieved. Ending experiment." << std::endl;
+      epoch = maxEpochs + 5;
+    }
+  }
+
+  // Clean up:
+  for (auto brain : population)
+    delete brain;
+
+  return 0;
+}
+
+int testTuples()
+{
+  typedef std::tuple<std::string, std::vector<std::string> > namePathTuple;
+
+  std::vector<namePathTuple> testParams;
+
+  testParams.push_back(namePathTuple("Hello", { "World.", "And stuff" }));
+  testParams.push_back(namePathTuple("Goodbye", { "Friggen", "Degree" }));
+
+  std::cout << "testParams: " << std::endl;
+
+  for (auto npt : testParams)
+  {
+    std::cout << std::get<0>(npt) << ": ";
+    for (auto pathPart : std::get<1>(npt))
+      std::cout << pathPart << " ";
+    std::cout << std::endl;
+  }
+
+  return 0;
+}
+
+int main(int argc, char** argv)
+{
+  std::string configFileName = "snapBrainConfig.yaml";
+
+  if (argc == 2)
+    configFileName = std::string(argv[1]);
+  // return testTuples();
+
+  std::cout << "Beginning experiment described in file: " << configFileName << std::endl;
+  return fullSnapTest(configFileName);
+}
 #endif

@@ -7,6 +7,29 @@
 
 namespace CGP
 {
+	// The dynamic overall probability type:
+	enum class DYNAMIC_PROBABILITY : int {
+		ADD,
+		SOLO,
+		MULTIPLY,
+		UNUSED,
+		UNDEFINED
+	};
+
+	std::string DynamicProbabilityToString(DYNAMIC_PROBABILITY x);
+	DYNAMIC_PROBABILITY StringToDynamicProbability(std::string in);
+
+	// The input preprocessing type:
+	enum class INPUT_PREPROCESSING : int {
+		UNDEFINED,
+		NO_CHANGE,
+		BUCKETS,
+		NEGATIVE_VALUE_ADD
+	};
+
+	std::string InputPreprocessingToString(INPUT_PREPROCESSING x);
+	INPUT_PREPROCESSING StringToInputPreprocessing(std::string in);
+
 	// The activation functions that can be applied to neuron outputs:
 	enum class JNEURON_ACTIVATION_FUNCTION :int {
 		NONE,
@@ -29,6 +52,17 @@ namespace CGP
 	std::string UpdateEventToString(UPDATE_EVENT x);
 	UPDATE_EVENT StringToUpdateEvent(std::string in);	
 	
+	// The possible types of neurons used by the snap paradigm:
+	enum class JNEURON_SNAP_TYPE : int {
+		UNDEFINED,
+		INPUT,
+		PROCESSING,
+		OUTPUT
+	};
+
+	std::string JneuronSnapTypeToString(JNEURON_SNAP_TYPE x);
+	JNEURON_SNAP_TYPE StringToJneuronSnapType(std::string in);
+
 	// The inputs that are used by the CGP programs that update
 	// the brain's characteristics:
 	enum class CGP_INPUT:int {
