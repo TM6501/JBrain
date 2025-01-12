@@ -5,6 +5,39 @@
 
 namespace CGP
 {
+	std::string HDCLearnModeToString(HDC_LEARN_MODE x)
+	{
+		std::string retVal = "UNDEFINED";
+		switch (x)
+		{
+		case HDC_LEARN_MODE::FULL:
+			retVal = "FULL";
+			break;
+		case HDC_LEARN_MODE::WRONG:
+			retVal = "WRONG";
+			break;
+		case HDC_LEARN_MODE::NONE:
+			retVal = "NONE";
+			break;
+		}
+
+		return retVal;
+	}
+
+	HDC_LEARN_MODE StringToHDCLearnMode(std::string in)
+	{
+		HDC_LEARN_MODE retVal = HDC_LEARN_MODE::UNDEFINED;
+		std::transform(in.begin(), in.end(), in.begin(), toupper);
+		if (in == "FULL")
+			retVal = HDC_LEARN_MODE::FULL;
+		else if (in == "WRONG")
+			retVal = HDC_LEARN_MODE::WRONG;
+		else if (in == "NONE")
+			retVal = HDC_LEARN_MODE::NONE;
+
+		return retVal;
+	}
+
 	std::string DynamicProbabilityToString(DYNAMIC_PROBABILITY x)
 	{
 		std::string retVal = "UNDEFINED";

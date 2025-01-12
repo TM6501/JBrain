@@ -7,6 +7,17 @@
 
 namespace CGP
 {
+	// If/How HDC learns:
+	enum class HDC_LEARN_MODE : int {
+		FULL, // Always update our understanding
+		WRONG, // Update if we answered incorrectly
+		NONE,  // No updates (probably testing)
+		UNDEFINED
+	};
+	
+	std::string HDCLearnModeToString(HDC_LEARN_MODE x);
+	HDC_LEARN_MODE StringToHDCLearnMode(std::string in);
+
 	// The dynamic overall probability type:
 	enum class DYNAMIC_PROBABILITY : int {
 		ADD,

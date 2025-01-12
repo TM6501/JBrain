@@ -19,12 +19,12 @@ class SageRunner:
 		self.env = None
 	
 	# We want a simple 1-environment agent:
-	def getEnv(self, renderMode=None):
-		return DummyVecEnv([lambda: gym.make("CartPole-v1", render_mode=renderMode)])
+	def getEnv(self, envName, renderMode):
+		return DummyVecEnv([lambda: gym.make(envName, render_mode=renderMode)])
 
 	# Training is independent and won't be called from C++:
 	def train(self, saveLocation):
-		vec_env = self.getEnv()
+		vec_env = self.getEnv("CartPole-v1", "rgb_array")
 		eval_env = gym.make("CartPole-v1")
 	
 		callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=500, verbose=1)
@@ -44,13 +44,13 @@ class SageRunner:
 			if str(x).endswith(".zip"):
 				self.model.append(PPO.load(str(x)[:-4])) # Cut off the ".zip"
 
-	def load(self):
+	def load(self, envName, sageFileName, renderMode):
 		if Path("sageCommittee").is_dir():
 			self.loadMultiplePPOSages("sageCommittee")
 		else:
-			self.model = [PPO.load('ppo_sage')]
+			self.model = [PPO.load(sageFileName)]
 	
-		self.env = self.getEnv(renderMode='rgb_array')
+		self.env = self.getEnv(envName, renderMode)
 
 	def render(self):		
 		self.env.render()
@@ -61,7 +61,7 @@ class SageRunner:
 
 		# Add in the rest (possibly no more):
 		for i in range(1, len(self.model), 1):
-			tmpAction, _ = self.model[i].predict(obs)
+			tmpAction, _ = self.model[i].predict(obs)			
 			action[0] += tmpAction[0]
 
 		# Get the average as a vote:
@@ -69,12 +69,12 @@ class SageRunner:
 		return action
 
 	def reset(self):
-		# Gather observations and actions:
-		obs = self.env.reset()
+		# Gather observations and actions:		
+		obs = self.env.reset()		
 		actions = self.getModelAction(obs)
 	
 		# We only want the first observation and first action:
-		actions = self.getList(actions[0])
+		actions = self.getList(actions[0])		
 		obs = self.getList(obs[0])
 		
 		return obs, actions
@@ -105,8 +105,11 @@ class SageRunner:
 		# agent needs:
 		return (obs, float(rewards), bool(dones), actions)
 
+	def testStringArguments(self, stringArg1, stringArg2):
+		print(f"In testStringArguments: {stringArg1}, {stringArg2}.", flush=True)
+
 	def test(self):
-		vec_env = self.getEnv(renderMode='human')
+		vec_env = self.getEnv("CartPole-v1", renderMode='human')
 		self.load()
 
 		obs = vec_env.reset()

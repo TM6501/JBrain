@@ -215,8 +215,15 @@ namespace JBrain
 	{
 		CGP::JNEURON_SNAP_TYPE m_type;
 		unsigned int m_neuronNumber;
-		unsigned int m_age;
+		unsigned int m_age;  // Also used as a count of the number of times the neuron COULD have fired.
 		double m_fireThreshold;
+		double m_fireValue;  // The output this neuron provides when firing.
+		
+		// This vectory tracks number of times this neuron fires when the expected output is
+		// the index to this vector.  For instance m_...[1] is a count of the number of times
+		// the neuron fired when the expected output was 1. If this code ever reaches the point of
+		// running in long-term systems, we need to handle integer rollovers.
+		std::vector<unsigned int> m_firedExpectedOutputCounts;
 
 		// Our dendrite connections. For input neurons, these values refer to input numbers instead
 		// of neuron numbers:
@@ -247,9 +254,36 @@ namespace JBrain
 			}
 		}
 
+		// Get how often this neuron fires when the proper action is X:
+		double getFirePercent(const unsigned int valToCheck)
+		{
+			if (m_age == 0)
+				return 0.0;
+			else
+				return static_cast<double>(m_firedExpectedOutputCounts[valToCheck]) / static_cast<double>(m_age);
+		}
+
+		// Fire percentage for the times this neuron fires for a given input when it does fire:
+		double getFirePurity(const unsigned int valToCheck)
+		{
+			unsigned int totalFires = 0;
+			for (auto& x : m_firedExpectedOutputCounts)
+				totalFires += x;
+
+			// Prevent division by zero:
+			if (totalFires == 0)
+				return 0.0;
+			else
+				return static_cast<double>(m_firedExpectedOutputCounts[valToCheck]) / static_cast<double>(totalFires);
+		}
+
 		JNeuron_Snap(const CGP::JNEURON_SNAP_TYPE& type, const unsigned int& neuronNumber,
-			const double& fireThreshold)
-			: m_type(type), m_neuronNumber(neuronNumber), m_age(0), m_fireThreshold(fireThreshold)
-		{}
+			const double& fireThreshold, const unsigned int& outputRange)
+			: m_type(type), m_neuronNumber(neuronNumber), m_age(0), m_fireThreshold(fireThreshold),
+			m_firedExpectedOutputCounts(outputRange), m_fireValue(-1.0)
+		{
+			// Fill the fired count vector with zeros:
+			std::fill(m_firedExpectedOutputCounts.begin(), m_firedExpectedOutputCounts.end(), 0);
+		}
 	};
 }
